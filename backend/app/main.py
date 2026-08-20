@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import setup_logging
+from app.db.redis import close_redis, init_redis, ping_redis
+from app.db.session import dispose_engine, ping_database
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -20,8 +22,27 @@ async def lifespan(app: FastAPI):
         "startup",
         extra={"ctx": {"env": settings.environment, "version": settings.version}},
     )
-    # Step 5: jalankan APScheduler (data collector) di sini
+
+    # ── Infrastructure check ──
+    await init_redis()  # warning internal jika gagal (dev: lanjut)
+    db_ok = await ping_database()
+    redis_ok = await ping_redis()
+
+    if settings.environment == "production" and not (db_ok and redis_ok):
+        # Fail-fast: production tidak boleh berjalan setengah hidup
+        raise RuntimeError(f"startup failed — database={db_ok}, redis={redis_ok}")
+
+    logger.info(
+        "infrastructure ready",
+        extra={"ctx": {"database": db_ok, "redis": redis_ok}},
+    )
+
+    # Step 5: APScheduler (data collector) start di sini
     yield
+
+    # ── Graceful shutdown ──
+    await close_redis()
+    await dispose_engine()
     logger.info("shutdown")
 
 
