@@ -1,0 +1,26 @@
+# ═══ Web framework ═══
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+
+# ═══ Config & validation ═══
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+
+# ═══ Database (async) ═══
+SQLAlchemy>=2.0.30
+aiosqlite>=0.20.0          # async driver SQLite (development)
+# asyncpg>=0.29.0          # aktifkan di Step 3 (PostgreSQL)
+alembic>=1.13.0            # migrasi — dipakai mulai Step 4
+
+# ═══ HTTP client untuk providers ═══
+httpx>=0.27.0              # dipakai mulai Step 5
+
+# ═══ Cache ═══
+redis>=5.0.0               # dipakai mulai Step 5
+
+# ═══ Scheduler data collector ═══
+APScheduler>=3.10.0        # dipakai mulai Step 5
+
+# ═══ Testing ═══
+pytest>=8.2.0
+pytest-asyncio>=0.23.0

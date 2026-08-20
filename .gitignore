@@ -1,0 +1,25 @@
+# ═══ Secrets — JANGAN pernah commit ═══
+.env
+backend/.env
+frontend/.env.local
+frontend/.env*.local
+
+# ═══ Python (backend) ═══
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.db
+*.sqlite3
+
+# ═══ Node (frontend) ═══
+node_modules/
+.next/
+out/
+
+# ═══ OS / IDE ═══
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
