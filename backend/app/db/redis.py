@@ -62,5 +62,8 @@ async def ping_redis() -> bool:
         finally:
             await client.aclose()
         return True
-    except Exception:
+    except Exception as exc:
+        logger.warning(
+            "redis ping failed — %s: %s", exc.__class__.__name__, exc
+        )
         return False

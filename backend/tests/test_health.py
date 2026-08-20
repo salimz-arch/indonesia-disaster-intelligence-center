@@ -4,10 +4,17 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 
-client = TestClient(app)
+
+@pytest.fixture(scope="module")
+def client():
+    """TestClient sebagai context manager — lifespan (startup/shutdown)
+    dijalankan, sehingga engine database & koneksi Redis dibersihkan
+    dengan benar. Menghilangkan RuntimeWarning GC di akhir sesi test."""
+    with TestClient(app) as c:
+        yield c
 
 
-def test_health_returns_success_envelope():
+def test_health_returns_success_envelope(client):
     res = client.get("/api/v1/health")
     assert res.status_code == 200
 
@@ -18,7 +25,7 @@ def test_health_returns_success_envelope():
     assert body["data"]["version"]
 
 
-def test_health_reports_components():
+def test_health_reports_components(client):
     body = client.get("/api/v1/health").json()
     components = body["data"]["components"]
 
@@ -26,7 +33,7 @@ def test_health_reports_components():
     assert all(v in ("ok", "unavailable") for v in components.values())
 
 
-def test_health_ok_when_infra_running():
+def test_health_ok_when_infra_running(client):
     """Bermakna penuh hanya jika infra Docker berjalan."""
     body = client.get("/api/v1/health").json()
     if body["data"]["components"]["database"] == "unavailable":
@@ -34,5 +41,5 @@ def test_health_ok_when_infra_running():
     assert body["data"]["status"] == "ok"
 
 
-def test_unknown_route_returns_404():
+def test_unknown_route_returns_404(client):
     assert client.get("/api/v1/does-not-exist").status_code == 404

@@ -12,9 +12,9 @@ from pathlib import Path
 # Pastikan package `app` bisa diimpor saat dijalankan sebagai file script
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.core.config import get_settings  # noqa: E402
-from app.db.redis import ping_redis  # noqa: E402
-from app.db.session import ping_database  # noqa: E402
+from app.core.config import get_settings
+from app.db.redis import ping_redis
+from app.db.session import ping_database
 
 
 def _mask_url(url: str) -> str:

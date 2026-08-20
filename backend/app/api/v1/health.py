@@ -1,5 +1,5 @@
 """Endpoint kesehatan sistem — liveness + status komponen infrastruktur."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter
 
@@ -18,7 +18,7 @@ async def health() -> dict:
 
     return {
         "success": True,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "data": {
             "status": "ok" if (db_ok and redis_ok) else "degraded",
             "app": settings.app_name,
