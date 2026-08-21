@@ -1,4 +1,5 @@
 """ORM: data_sources — registry + status tiap sumber data eksternal."""
+
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -15,9 +16,7 @@ class DataSource(Base, TimestampMixin):
     # earthquake | weather | rainfall | map | ai
     category: Mapped[str] = mapped_column(sa.String(40), nullable=False)
     # online | degraded | offline | unknown — di-update collector (Step 5)
-    status: Mapped[str] = mapped_column(
-        sa.String(20), default="unknown", nullable=False
-    )
+    status: Mapped[str] = mapped_column(sa.String(20), default="unknown", nullable=False)
     description: Mapped[str | None] = mapped_column(sa.String(255))
     last_success_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
     last_error: Mapped[str | None] = mapped_column(sa.Text)

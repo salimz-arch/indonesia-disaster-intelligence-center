@@ -5,6 +5,7 @@ Jalankan dari folder backend/ (venv aktif):
 
 Exit code 0 = semua sehat, 1 = ada komponen gagal.
 """
+
 import asyncio
 import sys
 from pathlib import Path

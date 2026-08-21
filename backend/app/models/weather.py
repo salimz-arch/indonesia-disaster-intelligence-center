@@ -1,4 +1,5 @@
 """ORM: weather_observations — observasi cuaca per lokasi per waktu."""
+
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -27,13 +28,9 @@ class WeatherObservation(Base, TimestampMixin):
     wind_direction_deg: Mapped[float | None] = mapped_column(sa.Float)
     visibility_km: Mapped[float | None] = mapped_column(sa.Float)
     cloud_cover_pct: Mapped[float | None] = mapped_column(sa.Float)
-    precipitation_mm: Mapped[float] = mapped_column(
-        sa.Float, default=0.0, nullable=False
-    )
+    precipitation_mm: Mapped[float] = mapped_column(sa.Float, default=0.0, nullable=False)
     condition_code: Mapped[str] = mapped_column(sa.String(64), nullable=False)
     condition_text: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     uv_index: Mapped[float | None] = mapped_column(sa.Float)
-    observed_at: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True), nullable=False
-    )
+    observed_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
     source: Mapped[str] = mapped_column(sa.String(50), nullable=False)

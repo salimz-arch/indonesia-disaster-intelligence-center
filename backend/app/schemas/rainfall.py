@@ -1,4 +1,5 @@
 """Canonical rainfall schema — kontrak provider → service → API."""
+
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
@@ -9,12 +10,12 @@ from app.schemas.common import UTCDateTime
 class RainfallIntensity(StrEnum):
     """Intensitas hujan (mm/jam) — kategori visual internal."""
 
-    NONE = "none"          # 0
-    LIGHT = "light"        # <= 1
-    MODERATE = "moderate"  # <= 5
-    HEAVY = "heavy"        # <= 10
-    VERY_HEAVY = "very_heavy"  # <= 20
-    EXTREME = "extreme"    # > 20
+    NONE = "none"
+    LIGHT = "light"
+    MODERATE = "moderate"
+    HEAVY = "heavy"
+    VERY_HEAVY = "very_heavy"
+    EXTREME = "extreme"
 
 
 def rainfall_intensity(mm_per_hour: float) -> RainfallIntensity:
@@ -31,8 +32,9 @@ def rainfall_intensity(mm_per_hour: float) -> RainfallIntensity:
     return RainfallIntensity.EXTREME
 
 
-class RainfallObservationCreate(BaseModel):
-    location_id: int
+class RainfallSnapshot(BaseModel):
+    """Akumulasi hujan canonical TANPA lokasi — live-fetch & basis Create/Read."""
+
     rainfall_1h_mm: float = Field(ge=0, le=500)
     rainfall_6h_mm: float | None = Field(None, ge=0, le=1500)
     rainfall_24h_mm: float | None = Field(None, ge=0, le=3000)
@@ -40,16 +42,15 @@ class RainfallObservationCreate(BaseModel):
     source: str = Field(min_length=1, max_length=50)
 
 
-class RainfallObservationRead(BaseModel):
+class RainfallObservationCreate(RainfallSnapshot):
+    location_id: int
+
+
+class RainfallObservationRead(RainfallSnapshot):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     location_id: int
-    rainfall_1h_mm: float
-    rainfall_6h_mm: float | None
-    rainfall_24h_mm: float | None
-    observed_at: UTCDateTime
-    source: str
 
     @computed_field
     @property

@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.core.logging import setup_logging
 from app.db.redis import close_redis, init_redis, ping_redis
 from app.db.session import dispose_engine, ping_database
+from app.providers.base import close_http_client
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -23,24 +24,31 @@ async def lifespan(app: FastAPI):
         extra={"ctx": {"env": settings.environment, "version": settings.version}},
     )
 
-    # ── Infrastructure check ──
-    await init_redis()  # warning internal jika gagal (dev: lanjut)
+    # ── Infrastructure check (fail-fast di production) ──
+    await init_redis()
     db_ok = await ping_database()
     redis_ok = await ping_redis()
-
     if settings.environment == "production" and not (db_ok and redis_ok):
-        # Fail-fast: production tidak boleh berjalan setengah hidup
         raise RuntimeError(f"startup failed — database={db_ok}, redis={redis_ok}")
-
     logger.info(
         "infrastructure ready",
         extra={"ctx": {"database": db_ok, "redis": redis_ok}},
     )
 
-    # Step 5: APScheduler (data collector) start di sini
+    # ── Data collector ──
+    if settings.scheduler_enabled:
+        from app.collector.scheduler import start_scheduler
+
+        start_scheduler()
+
     yield
 
     # ── Graceful shutdown ──
+    if settings.scheduler_enabled:
+        from app.collector.scheduler import stop_scheduler
+
+        stop_scheduler()
+    await close_http_client()
     await close_redis()
     await dispose_engine()
     logger.info("shutdown")

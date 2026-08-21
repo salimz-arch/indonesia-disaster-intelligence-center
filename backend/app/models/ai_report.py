@@ -3,6 +3,7 @@
 JSON polos (bukan JSONB) untuk MVP — upgrade ke JSONB + GIN index
 kalau nanti perlu query di dalam output_json.
 """
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -11,9 +12,7 @@ from app.db.base import Base, TimestampMixin
 
 class AIReport(Base, TimestampMixin):
     __tablename__ = "ai_reports"
-    __table_args__ = (
-        sa.CheckConstraint("risk_score BETWEEN 0 AND 100", name="risk_score_range"),
-    )
+    __table_args__ = (sa.CheckConstraint("risk_score BETWEEN 0 AND 100", name="risk_score_range"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     provider: Mapped[str] = mapped_column(sa.String(50), nullable=False)

@@ -3,6 +3,7 @@
 Kategori magnitude adalah kategori VISUAL INTERNAL aplikasi,
 bukan klasifikasi resmi lembaga seismik apa pun.
 """
+
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
@@ -12,12 +13,12 @@ from app.schemas.enums import Severity
 
 
 class MagnitudeCategory(StrEnum):
-    LOW = "low"            # < 3.0
+    LOW = "low"  # < 3.0
     MODERATE = "moderate"  # 3.0 - 3.9
     SIGNIFICANT = "significant"  # 4.0 - 4.9
-    STRONG = "strong"      # 5.0 - 5.9
-    MAJOR = "major"        # 6.0 - 6.9
-    SEVERE = "severe"      # >= 7.0
+    STRONG = "strong"  # 5.0 - 5.9
+    MAJOR = "major"  # 6.0 - 6.9
+    SEVERE = "severe"  # >= 7.0
 
 
 _CATEGORY_TO_SEVERITY: dict[MagnitudeCategory, Severity] = {

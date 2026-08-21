@@ -1,4 +1,5 @@
 """Canonical alert schema."""
+
 from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator

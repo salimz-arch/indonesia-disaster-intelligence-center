@@ -3,6 +3,7 @@
 Idempoten: aman dijalankan berulang. Jalankan dari backend/:
     python scripts/seed.py
 """
+
 import asyncio
 import sys
 from pathlib import Path

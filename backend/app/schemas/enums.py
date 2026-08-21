@@ -1,4 +1,5 @@
 """Enum domain — divalidasi Pydantic di boundary, disimpan sebagai string."""
+
 from enum import StrEnum
 
 
@@ -15,6 +16,7 @@ class EventType(StrEnum):
 
 class Severity(StrEnum):
     """Severity event — juga dipakai filter map (§21)."""
+
     LOW = "low"
     MODERATE = "moderate"
     HIGH = "high"
@@ -23,6 +25,7 @@ class Severity(StrEnum):
 
 class AlertLevel(StrEnum):
     """Level alert system (§13)."""
+
     NORMAL = "normal"
     WATCH = "watch"
     WARNING = "warning"

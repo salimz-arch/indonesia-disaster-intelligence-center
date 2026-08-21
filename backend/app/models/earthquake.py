@@ -1,4 +1,5 @@
 """ORM: earthquakes — event seismik canonical dari provider manapun."""
+
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -32,7 +33,5 @@ class Earthquake(Base, TimestampMixin):
     longitude: Mapped[float] = mapped_column(sa.Float, nullable=False)
     location_text: Mapped[str | None] = mapped_column(sa.Text)
     region: Mapped[str | None] = mapped_column(sa.String(120))
-    event_time: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True), nullable=False
-    )
+    event_time: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
     potential_tsunami: Mapped[bool] = mapped_column(default=False, nullable=False)

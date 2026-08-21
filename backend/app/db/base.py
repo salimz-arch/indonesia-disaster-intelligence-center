@@ -3,6 +3,7 @@
 Naming convention dipaksa konsisten supaya nama constraint yang
 di-generate Alembic deterministik (penting untuk migrasi berulang).
 """
+
 from datetime import datetime
 
 import sqlalchemy as sa

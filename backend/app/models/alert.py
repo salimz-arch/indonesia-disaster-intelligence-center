@@ -1,4 +1,5 @@
 """ORM: alerts — peringatan aktif (dari provider resmi atau internal rules)."""
+
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -22,9 +23,7 @@ class Alert(Base, TimestampMixin):
     latitude: Mapped[float | None] = mapped_column(sa.Float)
     longitude: Mapped[float | None] = mapped_column(sa.Float)
     location_text: Mapped[str | None] = mapped_column(sa.String(255))
-    triggered_at: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True), nullable=False
-    )
+    triggered_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
     source: Mapped[str] = mapped_column(sa.String(50), nullable=False)
     source_id: Mapped[str | None] = mapped_column(sa.String(100))

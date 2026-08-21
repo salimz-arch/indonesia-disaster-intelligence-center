@@ -4,6 +4,7 @@ Default development: PostgreSQL (Docker) — konsisten dengan production.
 Fallback tanpa Docker: SQLite (lihat .env.example).
 Engine bersifat lazy — dibuat saat import, koneksi dibuka saat dipakai.
 """
+
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import text

@@ -3,6 +3,7 @@
 risk_score adalah INTERNAL MONITORING SCORE dari Risk Engine
 deterministik — bukan prediksi resmi dan bukan keluaran LLM.
 """
+
 from datetime import datetime
 from enum import StrEnum
 
@@ -10,9 +11,9 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class RiskLevel(StrEnum):
-    LOW = "low"            # 0-30
+    LOW = "low"  # 0-30
     MODERATE = "moderate"  # 31-60
-    HIGH = "high"          # 61-80
+    HIGH = "high"  # 61-80
     CRITICAL = "critical"  # 81-100
 
 

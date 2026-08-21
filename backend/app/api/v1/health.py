@@ -1,4 +1,5 @@
 """Endpoint kesehatan sistem — liveness + status komponen infrastruktur."""
+
 from datetime import UTC, datetime
 
 from fastapi import APIRouter

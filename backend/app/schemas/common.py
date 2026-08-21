@@ -1,4 +1,5 @@
 """Utilitas schema bersama — tipe reusable untuk semua modul."""
+
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 

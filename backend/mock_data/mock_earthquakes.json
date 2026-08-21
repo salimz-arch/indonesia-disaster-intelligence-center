@@ -1,0 +1,77 @@
+{
+  "_label": "DEVELOPMENT / MOCK DATA — bukan data realtime",
+  "events": [
+    {
+      "minutes_ago": 8,
+      "magnitude": 5.4,
+      "depth_km": 22,
+      "latitude": 2.15,
+      "longitude": 98.85,
+      "location_text": "Mock: Humbang Hasundutan, Sumatera Utara",
+      "potential_tsunami": false
+    },
+    {
+      "minutes_ago": 45,
+      "magnitude": 4.6,
+      "depth_km": 10,
+      "latitude": -0.91,
+      "longitude": 119.87,
+      "location_text": "Mock: Parigi Moutong, Sulawesi Tengah",
+      "potential_tsunami": false
+    },
+    {
+      "minutes_ago": 120,
+      "magnitude": 3.2,
+      "depth_km": 35,
+      "latitude": -7.82,
+      "longitude": 107.31,
+      "location_text": "Mock: Selatan Jawa Barat",
+      "potential_tsunami": false
+    },
+    {
+      "minutes_ago": 260,
+      "magnitude": 6.1,
+      "depth_km": 140,
+      "latitude": -6.35,
+      "longitude": 130.25,
+      "location_text": "Mock: Laut Banda",
+      "potential_tsunami": true
+    },
+    {
+      "minutes_ago": 400,
+      "magnitude": 2.8,
+      "depth_km": 8,
+      "latitude": -8.41,
+      "longitude": 115.22,
+      "location_text": "Mock: Bali Barat",
+      "potential_tsunami": false
+    },
+    {
+      "minutes_ago": 700,
+      "magnitude": 4.9,
+      "depth_km": 55,
+      "latitude": 1.58,
+      "longitude": 127.65,
+      "location_text": "Mock: Halmahera Utara",
+      "potential_tsunami": false
+    },
+    {
+      "minutes_ago": 1100,
+      "magnitude": 5.8,
+      "depth_km": 30,
+      "latitude": 4.02,
+      "longitude": 95.31,
+      "location_text": "Mock: Barat Aceh",
+      "potential_tsunami": false
+    },
+    {
+      "minutes_ago": 2000,
+      "magnitude": 3.7,
+      "depth_km": 18,
+      "latitude": -3.85,
+      "longitude": 138.42,
+      "location_text": "Mock: Pegunungan Papua",
+      "potential_tsunami": false
+    }
+  ]
+}

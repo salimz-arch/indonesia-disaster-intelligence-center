@@ -1,4 +1,5 @@
 """ORM: disaster_events — event bencana non-seismik (bila tersedia provider)."""
+
 from datetime import datetime
 
 import sqlalchemy as sa
@@ -22,12 +23,8 @@ class DisasterEvent(Base, TimestampMixin):
     longitude: Mapped[float | None] = mapped_column(sa.Float)
     location_text: Mapped[str | None] = mapped_column(sa.String(255))
     description: Mapped[str | None] = mapped_column(sa.Text)
-    status: Mapped[str] = mapped_column(
-        sa.String(30), default="active", nullable=False
-    )
+    status: Mapped[str] = mapped_column(sa.String(30), default="active", nullable=False)
     source: Mapped[str] = mapped_column(sa.String(50), nullable=False)
     # Untuk dedup future; belum di-uniqukan karena format id tiap provider berbeda
     source_id: Mapped[str | None] = mapped_column(sa.String(100))
-    occurred_at: Mapped[datetime] = mapped_column(
-        sa.DateTime(timezone=True), nullable=False
-    )
+    occurred_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)

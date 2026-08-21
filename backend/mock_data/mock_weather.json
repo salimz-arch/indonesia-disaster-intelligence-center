@@ -1,0 +1,53 @@
+{
+  "_label": "DEVELOPMENT / MOCK DATA — bukan data realtime",
+  "default": {
+    "condition_code": "rain",
+    "temperature_c": 28.0,
+    "feels_like_c": 30.5,
+    "humidity_pct": 85,
+    "pressure_hpa": 1008,
+    "wind_speed_kmh": 18,
+    "wind_direction_deg": 210,
+    "cloud_cover_pct": 90,
+    "precipitation_mm": 2.4,
+    "uv_index": 4.5,
+    "rainfall_1h_mm": 2.4,
+    "rainfall_6h_mm": 14.2,
+    "rainfall_24h_mm": 41.8
+  },
+  "locations": {
+    "Jakarta": {
+      "condition_code": "heavy_rain",
+      "temperature_c": 27.5,
+      "feels_like_c": 31.0,
+      "humidity_pct": 91,
+      "wind_speed_kmh": 21,
+      "precipitation_mm": 8.1,
+      "rainfall_1h_mm": 8.1,
+      "rainfall_6h_mm": 27.5,
+      "rainfall_24h_mm": 96.3
+    },
+    "Padang": {
+      "condition_code": "thunderstorm",
+      "temperature_c": 26.8,
+      "feels_like_c": 30.2,
+      "humidity_pct": 94,
+      "wind_speed_kmh": 34,
+      "precipitation_mm": 12.6,
+      "rainfall_1h_mm": 12.6,
+      "rainfall_6h_mm": 45.0,
+      "rainfall_24h_mm": 121.7
+    },
+    "Jayapura": {
+      "condition_code": "partly_cloudy",
+      "temperature_c": 30.1,
+      "feels_like_c": 33.0,
+      "humidity_pct": 72,
+      "wind_speed_kmh": 9,
+      "precipitation_mm": 0.0,
+      "rainfall_1h_mm": 0.0,
+      "rainfall_6h_mm": 1.2,
+      "rainfall_24h_mm": 5.4
+    }
+  }
+}

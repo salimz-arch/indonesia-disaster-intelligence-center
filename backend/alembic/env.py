@@ -1,4 +1,5 @@
 """Alembic environment — async, URL dari app Settings (bukan alembic.ini)."""
+
 import asyncio
 import sys
 from logging.config import fileConfig

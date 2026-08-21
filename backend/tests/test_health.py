@@ -1,4 +1,5 @@
 """Smoke test: envelope + status komponen infrastruktur."""
+
 import pytest
 from fastapi.testclient import TestClient
 

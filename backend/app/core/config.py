@@ -19,17 +19,20 @@ class Settings(BaseSettings):
     version: str = "0.1.0"
     log_level: str = "INFO"
 
-    # ── CORS (comma-separated origins) ──
+    # ── CORS ──
     cors_origins: str = "http://localhost:3000"
 
     # ── Infrastructure ──
-    database_url: str = "sqlite+aiosqlite:///./idic.db"
-    redis_url: str = "redis://localhost:6379/0"
+    database_url: str = "postgresql+asyncpg://idic:idic@127.0.0.1:5432/idic"
+    redis_url: str = "redis://127.0.0.1:6379/0"
 
-    # ── Data collection intervals (detik) ──
+    # ── Data collection ──
+    data_mode: Literal["live", "mock"] = "live"
+    scheduler_enabled: bool = True
     earthquake_refresh_seconds: int = 60
+    usgs_refresh_seconds: int = 300
+    usgs_backfill_days: int = 7
     weather_refresh_seconds: int = 600
-    rainfall_refresh_seconds: int = 900
 
     # ── AI ──
     ai_provider: str = "mock"  # mock | gemini | openai

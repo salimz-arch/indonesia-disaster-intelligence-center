@@ -1,4 +1,5 @@
 """Canonical data source schema — untuk halaman Data Source Transparency."""
+
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict

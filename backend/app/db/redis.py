@@ -4,6 +4,7 @@ Filosofi: Redis adalah akselerator, bukan kebutuhan hidup.
 - development : aplikasi tetap jalan tanpa Redis (cache mati)
 - production  : fail-fast saat startup (dijalankan di main.py)
 """
+
 import logging
 
 import redis.asyncio as redis
@@ -63,7 +64,5 @@ async def ping_redis() -> bool:
             await client.aclose()
         return True
     except Exception as exc:
-        logger.warning(
-            "redis ping failed — %s: %s", exc.__class__.__name__, exc
-        )
+        logger.warning("redis ping failed — %s: %s", exc.__class__.__name__, exc)
         return False

@@ -1,4 +1,5 @@
 """Integration test: constraint DB + validasi canonical schema."""
+
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -69,9 +70,7 @@ def test_earthquake_create_rejects_out_of_range_latitude():
 
 def test_earthquake_create_rejects_future_time():
     with pytest.raises(ValidationError):
-        EarthquakeCreate(
-            **_create_kwargs(event_time=datetime.now(UTC) + timedelta(hours=1))
-        )
+        EarthquakeCreate(**_create_kwargs(event_time=datetime.now(UTC) + timedelta(hours=1)))
 
 
 def test_earthquake_create_normalizes_naive_time_to_utc():
@@ -138,7 +137,5 @@ async def test_weather_fk_cascade_delete(db_session):
     await db_session.delete(loc)
     await db_session.commit()
 
-    count = await db_session.scalar(
-        sa.select(sa.func.count()).select_from(WeatherObservation)
-    )
+    count = await db_session.scalar(sa.select(sa.func.count()).select_from(WeatherObservation))
     assert count == 0

@@ -6,12 +6,15 @@ line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-# E/F/W = pycodestyle+pyflakes, I = import sorting, UP = pyupgrade,
-# B = bugbear, ASYNC = async correctness, S = security, RUF = ruff khusus
 select = ["E", "F", "W", "I", "UP", "B", "ASYNC", "S", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101"]  # assert diperbolehkan di tests
+"tests/*" = ["S101"]
+"alembic/*" = ["E402"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI idiom: Depends() di default argument adalah pattern resmi
+extend-immutable-calls = ["fastapi.Depends"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

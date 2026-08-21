@@ -1,4 +1,5 @@
 """Canonical weather schema — kontrak provider → service → API."""
+
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -21,8 +22,10 @@ class WeatherCondition(StrEnum):
     UNKNOWN = "unknown"
 
 
-class WeatherObservationCreate(BaseModel):
-    location_id: int
+class WeatherSnapshot(BaseModel):
+    """Observasi cuaca canonical TANPA lokasi — dipakai live-fetch
+    (koordinat bebas) dan sebagai basis Create/Read."""
+
     temperature_c: float = Field(ge=-20, le=60)
     feels_like_c: float | None = Field(None, ge=-30, le=70)
     humidity_pct: float = Field(ge=0, le=100)
@@ -39,22 +42,12 @@ class WeatherObservationCreate(BaseModel):
     source: str = Field(min_length=1, max_length=50)
 
 
-class WeatherObservationRead(BaseModel):
+class WeatherObservationCreate(WeatherSnapshot):
+    location_id: int
+
+
+class WeatherObservationRead(WeatherSnapshot):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     location_id: int
-    temperature_c: float
-    feels_like_c: float | None
-    humidity_pct: float
-    pressure_hpa: float
-    wind_speed_kmh: float
-    wind_direction_deg: float | None
-    visibility_km: float | None
-    cloud_cover_pct: float | None
-    precipitation_mm: float
-    condition_code: WeatherCondition
-    condition_text: str
-    uv_index: float | None
-    observed_at: UTCDateTime
-    source: str

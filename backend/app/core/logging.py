@@ -4,6 +4,7 @@ Semua log diemit sebagai satu baris JSON. Secret (API key, token,
 password) dimask sebelum meninggalkan proses — tidak pernah
 bergantung pada disiplin "jangan log key" manual.
 """
+
 import json
 import logging
 import re

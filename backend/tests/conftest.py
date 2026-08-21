@@ -1,17 +1,22 @@
-"""Fixtures test database — PostgreSQL `idic_test` (dibuat/dihapus otomatis).
+"""Fixtures test — env isolation + test database `idic_test`.
 
-Terisolasi penuh dari database development. Skip otomatis jika
-server PostgreSQL tidak berjalan (unit test tetap dieksekusi).
+PENTING: env vars di-set SEBELUM import modul app apa pun.
+Test tidak pernah menjalankan scheduler & tidak pernah memukul API eksternal.
 """
 import asyncio
+import os
 import sys
 from pathlib import Path
+
+# ── Isolasi environment — HARUS sebelum import app ──
+os.environ["SCHEDULER_ENABLED"] = "false"
+os.environ["DATA_MODE"] = "mock"
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import app.models  # noqa: F401  (register semua model)
 from app.core.config import get_settings

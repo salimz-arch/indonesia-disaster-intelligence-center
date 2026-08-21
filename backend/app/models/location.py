@@ -1,4 +1,5 @@
 """ORM: locations — titik pantau utama (kota/kabupaten)."""
+
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -14,9 +15,7 @@ class Location(Base):
     latitude: Mapped[float] = mapped_column(sa.Float, nullable=False)
     longitude: Mapped[float] = mapped_column(sa.Float, nullable=False)
     # IANA timezone — dasar konversi WIB/WITA/WIT di presentation layer
-    timezone: Mapped[str] = mapped_column(
-        sa.String(50), default="Asia/Jakarta", nullable=False
-    )
+    timezone: Mapped[str] = mapped_column(sa.String(50), default="Asia/Jakarta", nullable=False)
     is_primary: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     def __repr__(self) -> str:
