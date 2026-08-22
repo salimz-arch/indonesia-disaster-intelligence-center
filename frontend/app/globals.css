@@ -1,26 +1,96 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+/* ═══ IDIC Dark Command Center — satu-satunya tema aplikasi (§24) ═══ */
+:root,
+.dark {
+  --background: #07111f;
+  --foreground: #f8fafc;
+  --card: #13263a;
+  --card-foreground: #f8fafc;
+  --popover: #0d1b2a;
+  --popover-foreground: #f8fafc;
+  --primary: #22d3ee;
+  --primary-foreground: #07111f;
+  --secondary: #0d1b2a;
+  --secondary-foreground: #f8fafc;
+  --muted: #0d1b2a;
+  --muted-foreground: #94a3b8;
+  --accent: #13263a;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #203b56;
+  --input: #203b56;
+  --ring: #22d3ee;
+  --radius: 1rem; /* 16px — dalam rentang 14–18px §25 */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── Accent palette IDIC — dipakai map & charts nanti ── */
+  --color-idic-bg: #07111f;
+  --color-idic-bg-2: #0d1b2a;
+  --color-idic-card: #13263a;
+  --color-idic-border: #203b56;
+  --color-idic-cyan: #22d3ee;
+  --color-idic-blue: #38bdf8;
+  --color-idic-green: #22c55e;
+  --color-idic-amber: #f59e0b;
+  --color-idic-orange: #f97316;
+  --color-idic-red: #ef4444;
+  --color-idic-magenta: #f43f5e;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Command-center scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #203b56;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2d4d70;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
