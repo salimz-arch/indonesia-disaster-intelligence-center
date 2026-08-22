@@ -1,38 +1,28 @@
-"use client";
-
-import { SystemStatusCard } from "@/components/common/system-status-card";
+import { Disclaimer } from "@/components/common/disclaimer";
 import { PageHeader } from "@/components/common/page-header";
-
-const MODULES = [
-  { label: "KPI Dashboard & Weather", step: "Step 7" },
-  { label: "Interactive Map", step: "Step 8" },
-  { label: "Earthquake Module", step: "Step 9" },
-  { label: "Weather Module", step: "Step 10" },
-  { label: "Rainfall & Radar", step: "Step 11" },
-  { label: "Realtime SSE", step: "Step 12" },
-];
+import { SystemStatusCard } from "@/components/common/system-status-card";
+import { EarthquakeActivityCard } from "@/components/earthquake/earthquake-activity-card";
+import { OverviewKpis } from "@/components/kpi/overview-kpis";
+import { WeatherConditionCard } from "@/components/weather/weather-condition-card";
 
 export default function OverviewPage() {
   return (
     <div className="space-y-6">
       <PageHeader
         title="Overview"
-        description="Real-time intelligence for weather, earthquake & disaster monitoring"
+        description="Real-Time Intelligence for Weather, Earthquake & Disaster Monitoring"
       />
 
-      <SystemStatusCard />
+      <OverviewKpis />
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {MODULES.map((m) => (
-          <div
-            key={m.label}
-            className="rounded-2xl border border-idic-border bg-idic-card/50 p-4"
-          >
-            <div className="text-sm">{m.label}</div>
-            <div className="mt-1 text-[11px] text-slate-500">{m.step}</div>
-          </div>
-        ))}
-      </section>
+      {/* Step 8 menyisipkan interactive map di sini (§14) */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <WeatherConditionCard />
+        <EarthquakeActivityCard />
+      </div>
+
+      <SystemStatusCard />
+      <Disclaimer />
     </div>
   );
 }

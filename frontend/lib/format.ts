@@ -64,3 +64,10 @@ export function formatNumber(n: number, maxFractionDigits = 1): string {
 export function formatDepth(km: number): string {
   return `${Math.round(km)} km`;
 }
+
+/** 210° → "SW" — arah angin dari mana angin bertiup. */
+export function windDirectionLabel(deg: number | null): string {
+  if (deg === null) return "";
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return dirs[Math.round(deg / 45) % 8];
+}
