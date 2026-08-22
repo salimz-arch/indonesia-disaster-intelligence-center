@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { useEffect } from "react";
 
 import { CardSkeleton } from "@/components/common/states";
+import {} from "@/lib/utils";
 
 interface KpiCardProps {
   icon: LucideIcon;
@@ -18,7 +19,11 @@ interface KpiCardProps {
   footer?: React.ReactNode;
 }
 
-/** KPI card §15 — count-up animation via framer-motion spring (§26). */
+/**
+ * KPI card §15 — count-up animation (§26).
+ * Mobile-safe: grid item root wajib min-w-0 agar track grid tidak dipaksa
+ * melebar oleh min-content label/nilai.
+ */
 export function KpiCard({
   icon: Icon,
   label,
@@ -46,34 +51,37 @@ export function KpiCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-2xl border border-idic-border bg-idic-card p-5"
+      className="min-w-0 w-full max-w-full rounded-2xl border border-idic-border bg-idic-card p-5"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span
-          className="flex h-9 w-9 items-center justify-center rounded-lg"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
           style={{ color: accent, backgroundColor: `${accent}14` }}
         >
           <Icon size={18} aria-hidden />
         </span>
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+        {/* min-w-0 + wrap: di kartu sempit label patah ke 2 baris, tidak mendorong lebar */}
+        <span className="min-w-0 text-right text-[10px] font-semibold uppercase leading-tight tracking-wide text-slate-500 sm:text-[11px] sm:tracking-widest">
           {label}
         </span>
       </div>
 
-      <div className="mt-3 flex items-baseline gap-1.5">
+      <div className="mt-3 flex min-w-0 items-baseline gap-1.5">
         {value === null ? (
           <span className="font-mono text-3xl text-slate-600">—</span>
         ) : (
-          <motion.span className="font-mono text-3xl font-semibold tabular-nums">
+          <motion.span className="font-mono text-2xl font-semibold tabular-nums sm:text-3xl">
             {display}
           </motion.span>
         )}
-        {unit && <span className="text-sm text-slate-400">{unit}</span>}
+        {unit && (
+          <span className="shrink-0 text-sm text-slate-400">{unit}</span>
+        )}
       </div>
 
       {error && <div className="mt-1 text-[11px] text-idic-red">{error}</div>}
 
-      {footer && <div className="mt-3">{footer}</div>}
+      {footer && <div className="mt-3 min-w-0">{footer}</div>}
     </motion.div>
   );
 }

@@ -10,11 +10,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-idic-bg">
+    <div className="flex min-h-screen w-full bg-idic-bg">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      {/* min-w-0: kolom konten boleh menyusut — mencegah grid/flex anak mendorong lebar page */}
+      <div className="flex min-w-0 w-full flex-1 flex-col">
         <Header />
-        <main className="flex-1 px-4 pb-24 pt-4 lg:px-6 lg:pb-6 lg:pt-6">
+        <main className="min-w-0 w-full flex-1 px-4 pb-24 pt-4 lg:px-6 lg:pb-6 lg:pt-6">
           {children}
         </main>
       </div>

@@ -1,10 +1,7 @@
 "use client";
 
-import { Activity, ArrowRight } from "lucide-react";
-
+import { ArrowRight, Mountain } from "lucide-react";
 import Link from "next/link";
-
-import { MagnitudeBadge } from "@/components/earthquake/magnitude-badge";
 
 import {
   EmptyState,
@@ -12,26 +9,25 @@ import {
   ListSkeleton,
 } from "@/components/common/states";
 
+import { MagnitudeBadge } from "@/components/earthquake/magnitude-badge";
 import { useLatestEarthquakes } from "@/hooks/use-earthquakes";
-
 import { formatDepth, formatTime, timeAgo } from "@/lib/format";
-
 import type { Earthquake } from "@/types/api";
 
 export function EarthquakeActivityCard() {
   const { data, isLoading, isError, error, refetch } = useLatestEarthquakes(8);
 
   return (
-    <section className="rounded-2xl border border-idic-border bg-idic-card p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
-          <Activity size={14} className="text-idic-cyan" aria-hidden />
+    <section className="min-w-0 w-full rounded-2xl border border-idic-border bg-idic-card p-5">
+      <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+        <h2 className="flex shrink-0 items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
+          <Mountain size={14} className="text-idic-cyan" aria-hidden />
           Earthquake Activity
         </h2>
 
         <Link
           href="/earthquake"
-          className="flex items-center gap-1 text-xs text-idic-cyan hover:underline"
+          className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-idic-cyan hover:underline"
         >
           Lihat semua <ArrowRight size={12} aria-hidden />
         </Link>
@@ -75,7 +71,7 @@ export function EarthquakeActivityCard() {
 
 function EarthquakeRow({ eq }: { eq: Earthquake }) {
   return (
-    <li className="flex items-center gap-3 py-2.5">
+    <li className="flex min-w-0 items-center gap-3 py-2.5">
       <MagnitudeBadge magnitude={eq.magnitude} category={eq.category} />
 
       {eq.potential_tsunami && (
@@ -85,17 +81,17 @@ function EarthquakeRow({ eq }: { eq: Earthquake }) {
       )}
 
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm">
+        <div className="wrap-break-word text-sm leading-snug line-clamp-2 sm:truncate sm:leading-normal">
           {eq.location_text ??
             `${eq.latitude.toFixed(2)}, ${eq.longitude.toFixed(2)}`}
         </div>
 
-        <div className="text-[11px] text-slate-500">
+        <div className="wrap-break-word text-[11px] text-slate-500">
           {formatDepth(eq.depth_km)} · {formatTime(eq.event_time)}
         </div>
       </div>
 
-      <span className="shrink-0 text-[11px] text-slate-500">
+      <span className="shrink-0 whitespace-nowrap text-[11px] text-slate-500">
         {timeAgo(eq.event_time)}
       </span>
     </li>

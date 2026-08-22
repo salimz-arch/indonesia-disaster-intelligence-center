@@ -37,7 +37,7 @@ const CONFIG: Record<
   },
 };
 
-/** Indikator koneksi §16 — selalu ikon/animasi + TEKS (§27 accessibility). */
+/** Indikator koneksi §16 — ikon/animasi + TEKS (§27). */
 export function LiveBadge({ status }: { status: ConnectionState }) {
   const cfg = CONFIG[status];
   return (
@@ -45,7 +45,7 @@ export function LiveBadge({ status }: { status: ConnectionState }) {
       role="status"
       aria-label={`Connection status: ${cfg.label}`}
       className={cn(
-        "flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide",
+        "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold sm:gap-2 sm:px-3 sm:text-xs sm:tracking-wide",
         cfg.classes,
       )}
     >
