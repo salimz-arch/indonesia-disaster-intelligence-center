@@ -1,15 +1,12 @@
-import { Map } from "lucide-react";
-import { PagePlaceholder } from "@/components/common/page-placeholder";
+import { EarthquakeMap } from "@/components/map/earthquake-map";
 
-export const metadata = { title: "Situational Map" };
+export const metadata = { title: "Map" };
 
+/** Full-height map — tanpa PageHeader agar peta mendapat ruang maksimal. */
 export default function MapPage() {
   return (
-    <PagePlaceholder
-      title="Situational Map"
-      description="Peta situasional Indonesia dengan visualisasi gempa, cuaca, curah hujan, dan informasi risiko terkait."
-      step="Step 8"
-      icon={Map}
-    />
+    <div className="h-[calc(100dvh-215px)] min-h-[440px] lg:h-[calc(100dvh-150px)]">
+      <EarthquakeMap variant="full" />
+    </div>
   );
 }

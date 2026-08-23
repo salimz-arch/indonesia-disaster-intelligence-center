@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { SystemStatusCard } from "@/components/common/system-status-card";
 import { EarthquakeActivityCard } from "@/components/earthquake/earthquake-activity-card";
 import { OverviewKpis } from "@/components/kpi/overview-kpis";
+import { EarthquakeMap } from "@/components/map/earthquake-map";
 import { WeatherConditionCard } from "@/components/weather/weather-condition-card";
 
 export default function OverviewPage() {
@@ -15,7 +16,9 @@ export default function OverviewPage() {
 
       <OverviewKpis />
 
-      {/* Step 8 menyisipkan interactive map di sini (§14) */}
+      {/* Interactive map (§14) */}
+      <EarthquakeMap variant="compact" />
+
       <div className="grid gap-6 xl:grid-cols-2">
         <WeatherConditionCard />
         <EarthquakeActivityCard />

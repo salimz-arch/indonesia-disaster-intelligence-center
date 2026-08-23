@@ -27,3 +27,15 @@ export function useEarthquakeCount(hours = 24, minMagnitude?: number) {
     select: (result) => result.data.total, // hanya butuh angka total
   });
 }
+
+/** Query peta: filter waktu + limit besar (marker penuh di viewport). */
+export function useEarthquakes(hours: number, limit = 200) {
+  return useQuery({
+    queryKey: ["earthquakes", "query", hours, limit],
+    queryFn: () =>
+      apiGet<ListData<Earthquake>>(
+        `/earthquakes?hours=${hours}&limit=${limit}`,
+      ),
+    refetchInterval: 60_000,
+  });
+}

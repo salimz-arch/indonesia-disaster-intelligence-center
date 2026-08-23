@@ -94,3 +94,64 @@
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+/* ═══ MapLibre GL — dark IDIC theme ═══ */
+.maplibregl-popup-content {
+  background: #13263a;
+  color: #f8fafc;
+  border: 1px solid #203b56;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 32px rgba(2, 8, 20, 0.6);
+}
+
+/* Warna tip per arah anchor (jangan set semua sisi — arrow jadi kotak) */
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: #13263a;
+}
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: #13263a;
+}
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #13263a;
+}
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #13263a;
+}
+
+.maplibregl-popup-close-button {
+  color: #94a3b8;
+  font-size: 15px;
+  padding: 2px 8px;
+}
+.maplibregl-popup-close-button:hover {
+  color: #f8fafc;
+  background: transparent;
+}
+
+.maplibregl-ctrl-group {
+  background: #0d1b2a;
+  border: 1px solid #203b56;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.maplibregl-ctrl-group button {
+  background: transparent;
+  width: 28px;
+  height: 28px;
+}
+.maplibregl-ctrl-group button:hover {
+  background: #13263a;
+}
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(0.75);
+}
+
+.maplibregl-ctrl-attrib {
+  background: rgba(13, 27, 42, 0.75);
+  border-radius: 6px;
+}
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib a {
+  color: #94a3b8;
+  font-size: 10px;
+}
