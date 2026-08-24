@@ -1,19 +1,71 @@
-import type { Map as MLMap } from "maplibre-gl";
-
-//import { CATEGORY_COLOR } from "@/lib/severity";
+import type { Map as MLMap, StyleSpecification } from "maplibre-gl";
 import type { Earthquake, MagnitudeCategory } from "@/types/api";
 
-/** CARTO Dark Matter (GL) — gratis, tanpa API key, selaras tema IDIC.
- *  Attribution (©OSM ©CARTO) otomatis dari metadata style. */
+/** CARTO Dark Matter (GL) — primary. Attribution ©OSM ©CARTO dari metadata. */
 export const MAP_STYLE_URL =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+
+/** Fallback: raster OSM yang di-dim (grayscale + gelap) — cocok tema dark. */
+export function buildFallbackStyle(): StyleSpecification {
+  return {
+    version: 8,
+    // Glyphs tetap disertakan untuk symbol layer (cluster count).
+    glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+    sources: {
+      "osm-dark": {
+        type: "raster",
+        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: "© OpenStreetMap contributors",
+      },
+    },
+    layers: [
+      {
+        id: "bg",
+        type: "background",
+        paint: { "background-color": "#07111F" },
+      },
+      {
+        id: "osm-dark-tiles",
+        type: "raster",
+        source: "osm-dark",
+        paint: {
+          "raster-saturation": -1, // grayscale
+          "raster-brightness-max": 0.55, // dim → dark theme
+          "raster-contrast": 0.15,
+          "raster-opacity": 0.9,
+        },
+      },
+    ],
+  };
+}
+
+/**
+ * Muat style basemap dengan fallback:
+ * 1. fetch CARTO dark GL → 2. gagal → fallback raster OSM dim → 3. gagal → style minimal.
+ * Map TIDAK PERNAH blank karena style gagal.
+ */
+export async function loadMapStyle(): Promise<{
+  style: StyleSpecification;
+  name: string;
+}> {
+  try {
+    const res = await fetch(MAP_STYLE_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const style = (await res.json()) as StyleSpecification;
+    return { style, name: "carto-dark" };
+  } catch {
+    return { style: buildFallbackStyle(), name: "osm-fallback" };
+  }
+}
 
 export const INDONESIA_CENTER: [number, number] = [117.5, -2.3];
 export const INDONESIA_BBOX: [[number, number], [number, number]] = [
   [94.5, -11.2],
   [141.5, 6.5],
 ];
-/** Batas pan — longgar agar tetap nyaman, tapi user tetap terorientasi ke Indonesia. */
+/** Batas pan — longgar agar nyaman, user tetap terorientasi ke Indonesia. */
 export const INDONESIA_MAX_BOUNDS: [[number, number], [number, number]] = [
   [85.0, -20.0],
   [152.0, 15.0],

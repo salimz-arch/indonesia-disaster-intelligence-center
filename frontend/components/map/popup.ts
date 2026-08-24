@@ -41,7 +41,7 @@ export function earthquakePopupHtml(d: QuakePopupData): string {
     d.location_text ?? `${d.latitude.toFixed(2)}, ${d.longitude.toFixed(2)}`;
 
   return `
-  <div style="min-width:230px;">
+  <div style="min-width:min(230px,64vw);max-width:100%;">
     <div style="font-size:10px;font-weight:700;letter-spacing:.18em;color:#94A3B8;">EARTHQUAKE</div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;">
       <span style="font-size:24px;font-weight:700;color:${color};font-variant-numeric:tabular-nums;">M ${d.magnitude.toFixed(1)}</span>

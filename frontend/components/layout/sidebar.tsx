@@ -45,7 +45,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Analytics",
     items: [
       { href: "/analytics", label: "Analytics", icon: BarChart3 },
-      { href: "/map", label: "Map", icon: Map },
+      { href: "/peta", label: "Map", icon: Map },
     ],
   },
   {
