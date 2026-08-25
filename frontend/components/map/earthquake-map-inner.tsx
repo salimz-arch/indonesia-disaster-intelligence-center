@@ -22,7 +22,6 @@ import { useEarthquakes } from "@/hooks/use-earthquakes";
 import { useRadar } from "@/hooks/use-radar";
 import {
   DEFAULT_ZOOM,
-  EQ_LAYERS,
   EQ_SOURCE,
   INDONESIA_BBOX,
   INDONESIA_CENTER,
@@ -46,7 +45,7 @@ export function EarthquakeMapInner({
 
   const [mapReady, setMapReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
-  const [basemap, setBasemap] = useState("carto-raster");
+  const [basemap, setBasemap] = useState("carto-gl");
   const [hours, setHours] = useState(24);
   const [radarOn, setRadarOn] = useState(false);
   const [radarFrame, setRadarFrame] = useState<number | null>(null);
@@ -107,48 +106,23 @@ export function EarthquakeMapInner({
 
           m.resize();
           fitIndonesia(m);
-          m.addControl(new NavigationControl({ showCompass: false }));
-
-          mapRef.current = m;
-          (window as unknown as { __idicMap?: MLMap }).__idicMap = m;
-          setMapReady(true);
-
-          console.log(
-            "[map] loaded — canvas:",
-            m.getCanvas().width,
-            "x",
-            m.getCanvas().height,
+          m.addControl(
+            new NavigationControl({ showCompass: false }),
+            "bottom-right",
           );
 
-          // Layout bisa selesai SATU FRAME setelah load — fit ulang di rAF
+          mapRef.current = m;
+          setMapReady(true);
+
+          // Layout bisa selesai satu frame setelah load — fit ulang di rAF
           requestAnimationFrame(() => {
             if (cancelled || userInteractedRef.current) return;
             m.resize();
             fitIndonesia(m);
           });
-
-          m.once("idle", () => {
-            const points = m.queryRenderedFeatures({
-              layers: [EQ_LAYERS.point],
-            });
-            const clusters = m.queryRenderedFeatures({
-              layers: [EQ_LAYERS.cluster],
-            });
-            console.log(
-              "[map] verify — zoom:",
-              m.getZoom().toFixed(2),
-              "| container:",
-              containerRef.current?.clientWidth,
-              "x",
-              containerRef.current?.clientHeight,
-              "| markers in view:",
-              points.length,
-              "| clusters in view:",
-              clusters.length,
-            );
-          });
         });
 
+        // Container bisa berukuran basi pra-layout → resize + refit kamera
         if (typeof ResizeObserver !== "undefined" && containerRef.current) {
           observer = new ResizeObserver(() => {
             map?.resize();
@@ -184,7 +158,6 @@ export function EarthquakeMapInner({
     if (!mapReady || !map) return;
 
     const geo = earthquakesToGeoJSON(earthquakes);
-    console.log("[map] data update — features:", geo.features.length);
 
     if (!map.getSource(EQ_SOURCE)) {
       addEarthquakeLayers(map, geo);
@@ -253,19 +226,14 @@ export function EarthquakeMapInner({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-2xl border border-idic-border bg-idic-bg-2",
-        // Tinggi MANDIRI (tidak bergantung rantai h-full parent):
-        // calc wajib pakai underscore utk spasi — calc(100dvh-215px) TANPA
-        // underscore adalah CSS invalid.
+        "relative w-full rounded-2xl border border-idic-border bg-idic-bg-2",
         variant === "compact"
           ? "h-[360px] sm:h-[420px]"
           : "h-[calc(100dvh_-_215px)] min-h-[440px] lg:h-[calc(100dvh_-_140px)]",
       )}
     >
-      {/* KRITIS: position via INLINE STYLE — tidak bisa dikalahkan oleh
-          .maplibregl-map { position: relative } dari CSS MapLibre,
-          yang selama ini menimpa class "absolute" Tailwind (specificity
-          sama, urutan stylesheet menentukan) → container tinggi 0. */}
+      {/* Inline style: position absolute tidak bisa ditimpa .maplibregl-map
+          { position: relative } — penyebab container 0-height. */}
       <div
         ref={containerRef}
         style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}

@@ -2,7 +2,11 @@ import type { Map as MLMap, StyleSpecification } from "maplibre-gl";
 
 import type { Earthquake, MagnitudeCategory } from "@/types/api";
 
-/** Probe resource dengan timeout — jaringan yang memblokir bisa menggantung, jangan menunggu selamanya. */
+/** CARTO Dark Matter GL — label terang & tajam (primary). */
+export const MAP_STYLE_URL =
+  "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+
+/** Probe resource dengan timeout. */
 async function probeUrl(url: string, timeoutMs = 4000): Promise<boolean> {
   try {
     const controller = new AbortController();
@@ -21,12 +25,46 @@ async function probeUrl(url: string, timeoutMs = 4000): Promise<boolean> {
   }
 }
 
-/** CARTO raster dark — satu pola URL, label tertanam di tile, tanpa sprite/vector dependency. */
+interface VectorLikeSource {
+  type: string;
+  tiles?: string[];
+}
+
+/**
+ * Muat GL style + probe SATU tile vector aktual dari URL pattern style
+ * (bukan asumsi): style.json bisa 200 sementara tile-nya diblokir jaringan.
+ * Lolos probe → GL vector (label terang). Gagal → null (ladder lanjut).
+ */
+async function loadGlStyle(): Promise<StyleSpecification | null> {
+  try {
+    const res = await fetch(MAP_STYLE_URL, { cache: "no-store" });
+    if (!res.ok) return null;
+    const style = (await res.json()) as StyleSpecification & {
+      sources: Record<string, VectorLikeSource>;
+    };
+
+    const vectorSource = Object.values(style.sources ?? {}).find(
+      (s) =>
+        s?.type === "vector" && Array.isArray(s.tiles) && s.tiles.length > 0,
+    );
+    if (!vectorSource?.tiles) return null;
+
+    const sampleTile = vectorSource.tiles[0]
+      .replace("{z}", "4")
+      .replace("{x}", "8")
+      .replace("{y}", "5");
+    if (!(await probeUrl(sampleTile))) return null;
+
+    return style;
+  } catch {
+    return null;
+  }
+}
+
+/** CARTO raster dark — label tertanam di tile, tanpa dependency vector. */
 export function buildCartoRasterStyle(): StyleSpecification {
   return {
     version: 8,
-    // Glyphs untuk label cluster count — jika domain ini diblokir, angka cluster
-    // tidak muncul tapi circle marker tetap render (degradasi dapat diterima)
     glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
     sources: {
       "carto-raster": {
@@ -87,7 +125,7 @@ export function buildFallbackStyle(): StyleSpecification {
   };
 }
 
-/** Minimal — jaringan memblokir semua tile CDN: dark bg + marker saja. */
+/** Minimal — semua tile CDN diblokir: dark bg + marker saja. */
 export function buildMinimalStyle(): StyleSpecification {
   return {
     version: 8,
@@ -106,9 +144,9 @@ export function buildMinimalStyle(): StyleSpecification {
 let _styleCache: { style: StyleSpecification; name: string } | null = null;
 
 /**
- * Pilih basemap berdasarkan PROBE aktual — bukan asumsi.
- * carto-raster → osm-fallback → minimal.
- * Hasil di-cache per page load (probe tidak diulang saat remount/hot-reload).
+ * Ladder basemap berbasis PROBE aktual:
+ * carto-gl (vector, label terang) → carto-raster → osm → minimal.
+ * Hasil di-cache per page load.
  */
 export async function loadMapStyle(): Promise<{
   style: StyleSpecification;
@@ -117,7 +155,13 @@ export async function loadMapStyle(): Promise<{
   if (_styleCache) return _styleCache;
 
   let result: { style: StyleSpecification; name: string };
-  if (await probeUrl("https://a.basemaps.cartocdn.com/dark_all/4/8/5.png")) {
+
+  const gl = await loadGlStyle();
+  if (gl) {
+    result = { style: gl, name: "carto-gl" };
+  } else if (
+    await probeUrl("https://a.basemaps.cartocdn.com/dark_all/4/8/5.png")
+  ) {
     result = { style: buildCartoRasterStyle(), name: "carto-raster" };
   } else if (await probeUrl("https://tile.openstreetmap.org/4/8/5.png")) {
     result = { style: buildFallbackStyle(), name: "osm-fallback" };
@@ -134,10 +178,6 @@ export const INDONESIA_CENTER: [number, number] = [117.5, -2.3];
 export const INDONESIA_BBOX: [[number, number], [number, number]] = [
   [94.5, -11.2],
   [141.5, 6.5],
-];
-export const INDONESIA_MAX_BOUNDS: [[number, number], [number, number]] = [
-  [85.0, -20.0],
-  [152.0, 15.0],
 ];
 export const DEFAULT_ZOOM = 4.1;
 
