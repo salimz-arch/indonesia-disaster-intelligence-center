@@ -25,7 +25,7 @@
   --border: #203b56;
   --input: #203b56;
   --ring: #22d3ee;
-  --radius: 1rem; /* 16px — dalam rentang 14–18px §25 */
+  --radius: 1rem;
 }
 
 @theme inline {
@@ -53,7 +53,6 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ── Accent palette IDIC — dipakai map & charts nanti ── */
   --color-idic-bg: #07111f;
   --color-idic-bg-2: #0d1b2a;
   --color-idic-card: #13263a;
@@ -94,9 +93,10 @@
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-/* ═══ MapLibre GL — dark IDIC theme (must use !important: maplibre CSS loads after globals) ═══ */
 
-/* Popup: transparent wrapper → hanya inner HTML kita yang terlihat */
+/* ═══ MapLibre GL — dark IDIC theme ═══ */
+
+/* Popup: transparent wrapper → hanya inner card kita yang terlihat */
 .maplibregl-popup-content {
   background: transparent !important;
   border: none !important;
@@ -105,12 +105,10 @@
   box-shadow: none !important;
 }
 
-/* Hilangkan arrow tip (pakai card style, bukan bubble) */
 .maplibregl-popup-tip {
   display: none !important;
 }
 
-/* Close button (×) — dark theme */
 .maplibregl-popup-close-button {
   color: #94a3b8 !important;
   font-size: 14px !important;
@@ -155,14 +153,8 @@
   filter: invert(0.75) !important;
 }
 
-/* Sembunyikan compass "N" — force hide semua varian */
-.maplibregl-ctrl-compass,
-.maplibregl-ctrl button[aria-label*="compass"],
-.maplibregl-ctrl button[aria-label*="Compass"],
-.maplibregl-ctrl button[aria-label*="North"],
-.maplibregl-ctrl button[aria-label*="Reset"],
-.maplibregl-ctrl button[title*="compass"],
-.maplibregl-ctrl button[title*="Compass"] {
+/* Compass — hidden via showCompass: false, CSS sebagai backup */
+.maplibregl-ctrl-compass {
   display: none !important;
 }
 
@@ -175,23 +167,4 @@
 .maplibregl-ctrl-attrib a {
   color: #94a3b8 !important;
   font-size: 10px !important;
-}
-
-/* Nuclear option - hide ALL compass */
-.maplibregl-ctrl-compass,
-[class*="compass"],
-[aria-label*="compass" i],
-[title*="compass" i] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  width: 0 !important;
-  height: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Hide parent containers that might hold compass */
-.maplibregl-ctrl-top-left,
-.maplibregl-ctrl-bottom-left {
-  display: none !important;
 }
