@@ -176,3 +176,22 @@
   color: #94a3b8 !important;
   font-size: 10px !important;
 }
+
+/* Nuclear option - hide ALL compass */
+.maplibregl-ctrl-compass,
+[class*="compass"],
+[aria-label*="compass" i],
+[title*="compass" i] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide parent containers that might hold compass */
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-bottom-left {
+  display: none !important;
+}
