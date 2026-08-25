@@ -2,12 +2,13 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { Map as MLMap } from "maplibre-gl";
+import { Map as MLMap, NavigationControl } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   addEarthquakeLayers,
   attachEarthquakeInteractions,
+  hasRecentEvents,
   setEarthquakeData,
   startRippleAnimation,
 } from "@/components/map/layers/earthquakes";
@@ -21,20 +22,16 @@ import { useEarthquakes } from "@/hooks/use-earthquakes";
 import { useRadar } from "@/hooks/use-radar";
 import {
   DEFAULT_ZOOM,
+  EQ_LAYERS,
   EQ_SOURCE,
   INDONESIA_BBOX,
   INDONESIA_CENTER,
-  INDONESIA_MAX_BOUNDS,
   earthquakesToGeoJSON,
-  hasRecentEvents,
   loadMapStyle,
 } from "@/lib/map";
 import { cn } from "@/lib/utils";
 import type { RadarFrame } from "@/types/api";
 
-type MaplibreModule = typeof import("maplibre-gl");
-
-/** Dipakai Overview (compact) & halaman /peta (full). Semua kegagalan tampil eksplisit. */
 export function EarthquakeMapInner({
   variant = "full",
 }: {
@@ -42,19 +39,18 @@ export function EarthquakeMapInner({
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MLMap | null>(null);
-  const maplibreRef = useRef<MaplibreModule | null>(null);
   const stopRippleRef = useRef<(() => void) | null>(null);
   const stopRadarRef = useRef<(() => void) | null>(null);
   const radarLayerCountRef = useRef(0);
+  const userInteractedRef = useRef(false);
 
   const [mapReady, setMapReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
-  const [basemap, setBasemap] = useState<"carto" | "fallback">("carto");
+  const [basemap, setBasemap] = useState("carto-raster");
   const [hours, setHours] = useState(24);
   const [radarOn, setRadarOn] = useState(false);
   const [radarFrame, setRadarFrame] = useState<number | null>(null);
 
-  // ── Data ──
   const quakes = useEarthquakes(hours, 200);
   const radar = useRadar(radarOn);
 
@@ -69,55 +65,97 @@ export function EarthquakeMapInner({
     return [...radarData.frames].sort((a, b) => a.time - b.time);
   }, [radarData]);
 
-  // ── Init map — maplibre dinamis DI DALAM effect (SSR-safe) + error terlihat ──
+  // ── Init ──
   useEffect(() => {
-    console.log("[map] effect STARTED"); // ← TAMBAHKAN INI UNTUK DIAGNOSTIK
     let cancelled = false;
     let map: MLMap | null = null;
     let observer: ResizeObserver | null = null;
 
+    const fitIndonesia = (m: MLMap) => {
+      m.fitBounds(INDONESIA_BBOX, { padding: 32, duration: 0, maxZoom: 5.5 });
+    };
+
     void (async () => {
       try {
-        // 1. maplibre runtime — hanya di browser, tidak pernah di server
-        const ml = await import("maplibre-gl");
-        // 2. style basemap dengan fallback chain
         const { style, name } = await loadMapStyle();
         if (cancelled || !containerRef.current) return;
 
-        maplibreRef.current = ml;
-        setBasemap(name === "carto-dark" ? "carto" : "fallback");
+        setBasemap(name);
 
-        map = new ml.Map({
+        map = new MLMap({
           container: containerRef.current,
           style,
           center: INDONESIA_CENTER,
           zoom: DEFAULT_ZOOM,
-          maxBounds: INDONESIA_MAX_BOUNDS,
+          minZoom: 1.8,
         });
-        map.addControl(new ml.NavigationControl({ showCompass: false }));
-        map.fitBounds(INDONESIA_BBOX, { padding: 32, duration: 0 });
 
         map.on("error", (e) => {
           console.warn("[map]", e?.error?.message ?? "map error");
         });
 
+        map.on("dragstart", () => {
+          userInteractedRef.current = true;
+        });
+        map.on("wheel", () => {
+          userInteractedRef.current = true;
+        });
+
         map.on("load", () => {
-          if (cancelled) return;
-          // Diagnostik: ukuran canvas + jumlah layer — paste ke saya jika bermasalah
+          const m = map;
+          if (cancelled || !m) return;
+
+          m.resize();
+          fitIndonesia(m);
+          m.addControl(new NavigationControl({ showCompass: false }));
+
+          mapRef.current = m;
+          (window as unknown as { __idicMap?: MLMap }).__idicMap = m;
+          setMapReady(true);
+
           console.log(
             "[map] loaded — canvas:",
-            map?.getCanvas().width,
+            m.getCanvas().width,
             "x",
-            map?.getCanvas().height,
-            "| style layers:",
-            map?.getStyle().layers.length,
+            m.getCanvas().height,
           );
-          mapRef.current = map;
-          setMapReady(true);
+
+          // Layout bisa selesai SATU FRAME setelah load — fit ulang di rAF
+          requestAnimationFrame(() => {
+            if (cancelled || userInteractedRef.current) return;
+            m.resize();
+            fitIndonesia(m);
+          });
+
+          m.once("idle", () => {
+            const points = m.queryRenderedFeatures({
+              layers: [EQ_LAYERS.point],
+            });
+            const clusters = m.queryRenderedFeatures({
+              layers: [EQ_LAYERS.cluster],
+            });
+            console.log(
+              "[map] verify — zoom:",
+              m.getZoom().toFixed(2),
+              "| container:",
+              containerRef.current?.clientWidth,
+              "x",
+              containerRef.current?.clientHeight,
+              "| markers in view:",
+              points.length,
+              "| clusters in view:",
+              clusters.length,
+            );
+          });
         });
 
         if (typeof ResizeObserver !== "undefined" && containerRef.current) {
-          observer = new ResizeObserver(() => map?.resize());
+          observer = new ResizeObserver(() => {
+            map?.resize();
+            if (map && !userInteractedRef.current) {
+              fitIndonesia(map);
+            }
+          });
           observer.observe(containerRef.current);
         }
       } catch (err) {
@@ -137,21 +175,20 @@ export function EarthquakeMapInner({
       stopRadarRef.current = null;
       map?.remove();
       mapRef.current = null;
-      maplibreRef.current = null;
     };
   }, []);
 
-  // ── Layer gempa + update data + kelola ripple ──
+  // ── Layer gempa + ripple ──
   useEffect(() => {
     const map = mapRef.current;
-    const ml = maplibreRef.current;
-    if (!mapReady || !map || !ml) return;
+    if (!mapReady || !map) return;
 
     const geo = earthquakesToGeoJSON(earthquakes);
+    console.log("[map] data update — features:", geo.features.length);
 
     if (!map.getSource(EQ_SOURCE)) {
       addEarthquakeLayers(map, geo);
-      attachEarthquakeInteractions(map, ml);
+      attachEarthquakeInteractions(map);
     } else {
       setEarthquakeData(map, geo);
     }
@@ -163,7 +200,7 @@ export function EarthquakeMapInner({
     }
   }, [mapReady, earthquakes]);
 
-  // ── Layer radar + animasi frame ──
+  // ── Layer radar + animasi ──
   useEffect(() => {
     const map = mapRef.current;
     if (!mapReady || !map) return;
@@ -201,21 +238,37 @@ export function EarthquakeMapInner({
       minute: "2-digit",
       hour12: false,
     }).format(new Date(frame.time * 1000));
-    return { time: `${time} WIB`, nowcast: frame.kind === "nowcast" };
+    const diffMin = Math.round((frame.time * 1000 - Date.now()) / 60_000);
+    let relative: string;
+    if (Math.abs(diffMin) <= 10) {
+      relative = "TERKINI";
+    } else if (diffMin > 0) {
+      relative = `+${diffMin} mnt`;
+    } else {
+      relative = `${diffMin} mnt`;
+    }
+    return { time: `${time} WIB`, relative, nowcast: frame.kind === "nowcast" };
   }, [radarOn, radarFrame, radarFrames]);
 
   return (
     <div
       className={cn(
         "relative w-full overflow-hidden rounded-2xl border border-idic-border bg-idic-bg-2",
+        // Tinggi MANDIRI (tidak bergantung rantai h-full parent):
+        // calc wajib pakai underscore utk spasi — calc(100dvh-215px) TANPA
+        // underscore adalah CSS invalid.
         variant === "compact"
           ? "h-[360px] sm:h-[420px]"
-          : "h-full min-h-[440px]",
+          : "h-[calc(100dvh_-_215px)] min-h-[440px] lg:h-[calc(100dvh_-_140px)]",
       )}
     >
+      {/* KRITIS: position via INLINE STYLE — tidak bisa dikalahkan oleh
+          .maplibregl-map { position: relative } dari CSS MapLibre,
+          yang selama ini menimpa class "absolute" Tailwind (specificity
+          sama, urutan stylesheet menentukan) → container tinggi 0. */}
       <div
         ref={containerRef}
-        className="absolute inset-0"
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
         role="application"
         aria-label="Peta monitoring bencana Indonesia"
       />
@@ -235,23 +288,28 @@ export function EarthquakeMapInner({
 
       <MapLegend />
 
-      {/* Kegagalan init TIDAK lagi bisu — tampil eksplisit */}
       {initError && (
         <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
           <div className="max-w-sm rounded-xl border border-idic-red/40 bg-idic-bg-2/95 p-4 text-center">
             <div className="text-xs font-bold tracking-widest text-idic-red">
               MAP INIT FAILED
             </div>
-            <p className="mt-2 break-words text-xs leading-relaxed text-slate-400">
+            <p className="mt-2 break-words text-xs text-slate-400">
               {initError}
             </p>
           </div>
         </div>
       )}
 
-      {basemap === "fallback" && !initError && (
+      {!initError && basemap === "osm-fallback" && (
         <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-lg border border-idic-border bg-idic-bg-2/90 px-2.5 py-1 text-[10px] text-slate-500">
           basemap fallback: OSM
+        </span>
+      )}
+
+      {!initError && basemap === "minimal" && (
+        <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-lg border border-idic-amber/40 bg-idic-amber/10 px-2.5 py-1 text-[10px] text-idic-amber">
+          basemap unavailable — jaringan memblokir tile CDN
         </span>
       )}
     </div>

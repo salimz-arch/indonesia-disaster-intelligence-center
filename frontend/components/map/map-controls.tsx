@@ -17,7 +17,7 @@ export interface MapControlsProps {
   onRadarToggle: () => void;
   radarLoading: boolean;
   radarError: boolean;
-  frameLabel: { time: string; nowcast: boolean } | null;
+  frameLabel: { time: string; relative: string; nowcast: boolean } | null;
   quakesLoading: boolean;
   quakesError: boolean;
   onRetryQuakes: () => void;
@@ -84,13 +84,25 @@ export function MapControls({
 
       {/* Waktu frame radar aktif */}
       {radarOn && frameLabel && (
-        <span className="pointer-events-auto inline-flex items-center gap-1.5 rounded-lg border border-idic-border bg-idic-bg-2/90 px-2.5 py-1.5 font-mono text-xs text-slate-300 backdrop-blur-sm">
+        <span
+          className="pointer-events-auto inline-flex items-center gap-1.5 rounded-lg border border-idic-border bg-idic-bg-2/90 px-2.5 py-1.5 font-mono text-xs text-slate-300 backdrop-blur-sm"
+          title="Waktu data radar yang sedang ditampilkan — bukan jam. Frame historis 2 jam terakhir + nowcast."
+        >
           {frameLabel.time}
-          {frameLabel.nowcast && (
-            <span className="rounded bg-idic-magenta/20 px-1 text-[9px] font-bold tracking-wide text-idic-magenta">
-              FORECAST
-            </span>
-          )}
+          <span
+            className={cn(
+              "rounded px-1 text-[9px] font-bold tracking-wide",
+              frameLabel.nowcast
+                ? "bg-idic-magenta/20 text-idic-magenta"
+                : frameLabel.relative === "TERKINI"
+                  ? "bg-idic-cyan/20 text-idic-cyan"
+                  : "bg-idic-amber/20 text-idic-amber",
+            )}
+          >
+            {frameLabel.nowcast
+              ? `FORECAST ${frameLabel.relative}`
+              : frameLabel.relative}
+          </span>
         </span>
       )}
 

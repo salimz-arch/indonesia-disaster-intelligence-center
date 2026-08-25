@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import setup_logging
+from app.core.error_middleware import ErrorHandlingMiddleware  # <-- IMPORT BARU
 from app.db.redis import close_redis, init_redis, ping_redis
 from app.db.session import dispose_engine, ping_database
 from app.providers.base import close_http_client
@@ -62,7 +63,8 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         openapi_url="/openapi.json",
     )
-        # ── CORS ──
+
+    # ── 1. CORS (Lapisan LUAR) ──
     # Dev: izinkan SEMUA port localhost (fleksibel utk npm run dev / next start -p XXXX)
     # Prod: pakai allowlist eksplisit dari .env
     if settings.is_dev:
@@ -70,7 +72,7 @@ def create_app() -> FastAPI:
             CORSMiddleware,
             allow_origin_regex=r"https?://(localhost|127\.0\.0\.1):\d+",
             allow_credentials=True,
-            allow_methods=["GET", "POST"],
+            allow_methods=["GET", "POST", "OPTIONS"],  # Ditambahkan OPTIONS
             allow_headers=["*"],
         )
     else:
@@ -78,9 +80,16 @@ def create_app() -> FastAPI:
             CORSMiddleware,
             allow_origins=settings.cors_origin_list,
             allow_credentials=True,
-            allow_methods=["GET", "POST"],
+            allow_methods=["GET", "POST", "OPTIONS"],  # Ditambahkan OPTIONS
             allow_headers=["*"],
         )
+
+    # ── 2. Error Handler (Lapisan DALAM) ──
+    # Menangkap exception (misal DB timeout) dan mengembalikan 503 JSON.
+    # Karena ditaruh SETELAH CORS, response error ini tetap akan memiliki 
+    # header CORS yang valid, mencegah error palsu di browser.
+    app.add_middleware(ErrorHandlingMiddleware)
+
     app.include_router(api_router, prefix="/api/v1")
     return app
 

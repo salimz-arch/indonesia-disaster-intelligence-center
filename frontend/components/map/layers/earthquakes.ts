@@ -1,3 +1,4 @@
+import { Popup } from "maplibre-gl";
 import type {
   GeoJSONSource,
   Map as MLMap,
@@ -17,12 +18,6 @@ import {
 } from "@/lib/map";
 import { CATEGORY_COLOR } from "@/lib/severity";
 import type { MagnitudeCategory } from "@/types/api";
-
-/**
- * HANYA import type dari maplibre-gl di file ini (dihapus saat compile)
- * → aman untuk SSR. Runtime class (Popup) di-inject dari caller.
- */
-type MaplibreModule = typeof import("maplibre-gl");
 
 const toPaint = (v: unknown) => v as never;
 
@@ -74,7 +69,6 @@ const magRippleGrowth = (): unknown[] => [
   44,
 ];
 
-/** Type guard Point — fix TS2352 (geometry union memuat GeometryCollection). */
 function pointCoordinates(feature: MapGeoJSONFeature): [number, number] {
   const geom = feature.geometry;
   if (geom && geom.type === "Point") {
@@ -94,7 +88,7 @@ export function addEarthquakeLayers(
       data,
       cluster: true,
       clusterRadius: 40,
-      clusterMaxZoom: 5,
+      clusterMaxZoom: 3,
     }),
   );
 
@@ -105,10 +99,10 @@ export function addEarthquakeLayers(
       source: EQ_SOURCE,
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": "rgba(34, 211, 238, 0.22)",
-        "circle-stroke-color": "rgba(34, 211, 238, 0.65)",
-        "circle-stroke-width": 1,
-        "circle-radius": ["step", ["get", "point_count"], 15, 10, 21, 25, 27],
+        "circle-color": "rgba(34, 211, 238, 0.30)", // ← UBAH
+        "circle-stroke-color": "rgba(34, 211, 238, 0.75)", // ← UBAH
+        "circle-stroke-width": 1.5, // ← UBAH
+        "circle-radius": ["step", ["get", "point_count"], 17, 10, 23, 25, 29], // ← UBAH
       },
     }),
   );
@@ -177,10 +171,14 @@ export function setEarthquakeData(
   source.setData(data as unknown as Parameters<GeoJSONSource["setData"]>[0]);
 }
 
+// ✅ FUNGSI INI YANG DITAMBAHKAN UNTUK MEMPERBAIKI ERROR TYPESCRIPT
+export function hasRecentEvents(data: QuakeFeatureCollection): boolean {
+  return data.features.some((f) => f.properties?.recent === true);
+}
+
 export function startRippleAnimation(map: MLMap): () => void {
   const CYCLE_MS = 2400;
   let raf = 0;
-
   const frame = (t: number) => {
     const pulse = (t % CYCLE_MS) / CYCLE_MS;
     const phase: unknown[] = ["%", ["+", pulse, ["get", "phase"]], 1];
@@ -196,27 +194,20 @@ export function startRippleAnimation(map: MLMap): () => void {
         toPaint(["*", 0.5, ["-", 1, phase]]),
       );
     } catch {
-      // race saat data berganti — lewati frame ini
+      /* race */
     }
     raf = requestAnimationFrame(frame);
   };
-
   raf = requestAnimationFrame(frame);
   return () => cancelAnimationFrame(raf);
 }
 
-/** Interaksi: popup detail, cluster expand, cursor pointer. ml di-inject (SSR-safe). */
-export function attachEarthquakeInteractions(
-  map: MLMap,
-  ml: MaplibreModule,
-): void {
+export function attachEarthquakeInteractions(map: MLMap): void {
   map.on("click", EQ_LAYERS.point, (e) => {
     const feature = e.features?.[0];
     if (!feature) return;
-
     const props = (feature.properties ?? {}) as Record<string, unknown>;
     const coords = pointCoordinates(feature);
-
     const data: QuakePopupData = {
       magnitude: Number(props.magnitude),
       depth_km: Number(props.depth_km),
@@ -229,8 +220,7 @@ export function attachEarthquakeInteractions(
       latitude: coords[1],
       longitude: coords[0],
     };
-
-    new ml.Popup({
+    new Popup({
       offset: 16,
       closeButton: true,
       closeOnClick: true,
@@ -250,9 +240,9 @@ export function attachEarthquakeInteractions(
     if (!source) return;
     void source
       .getClusterExpansionZoom(Number(props.cluster_id))
-      .then((zoom: number) => {
-        map.easeTo({ center: coords, zoom: Math.min(zoom + 0.2, 10) });
-      })
+      .then((zoom: number) =>
+        map.easeTo({ center: coords, zoom: Math.min(zoom + 0.2, 10) }),
+      )
       .catch(() => undefined);
   });
 

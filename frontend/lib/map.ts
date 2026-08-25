@@ -1,15 +1,61 @@
 import type { Map as MLMap, StyleSpecification } from "maplibre-gl";
+
 import type { Earthquake, MagnitudeCategory } from "@/types/api";
 
-/** CARTO Dark Matter (GL) — primary. Attribution ©OSM ©CARTO dari metadata. */
-export const MAP_STYLE_URL =
-  "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+/** Probe resource dengan timeout — jaringan yang memblokir bisa menggantung, jangan menunggu selamanya. */
+async function probeUrl(url: string, timeoutMs = 4000): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      return res.ok;
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch {
+    return false;
+  }
+}
 
-/** Fallback: raster OSM yang di-dim (grayscale + gelap) — cocok tema dark. */
+/** CARTO raster dark — satu pola URL, label tertanam di tile, tanpa sprite/vector dependency. */
+export function buildCartoRasterStyle(): StyleSpecification {
+  return {
+    version: 8,
+    // Glyphs untuk label cluster count — jika domain ini diblokir, angka cluster
+    // tidak muncul tapi circle marker tetap render (degradasi dapat diterima)
+    glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+    sources: {
+      "carto-raster": {
+        type: "raster",
+        tiles: [
+          "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+          "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+          "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: "© OpenStreetMap contributors © CARTO",
+      },
+    },
+    layers: [
+      {
+        id: "bg",
+        type: "background",
+        paint: { "background-color": "#07111F" },
+      },
+      { id: "carto-dark-tiles", type: "raster", source: "carto-raster" },
+    ],
+  };
+}
+
+/** OSM dim — fallback universal. */
 export function buildFallbackStyle(): StyleSpecification {
   return {
     version: 8,
-    // Glyphs tetap disertakan untuk symbol layer (cluster count).
     glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
     sources: {
       "osm-dark": {
@@ -31,8 +77,8 @@ export function buildFallbackStyle(): StyleSpecification {
         type: "raster",
         source: "osm-dark",
         paint: {
-          "raster-saturation": -1, // grayscale
-          "raster-brightness-max": 0.55, // dim → dark theme
+          "raster-saturation": -1,
+          "raster-brightness-max": 0.55,
           "raster-contrast": 0.15,
           "raster-opacity": 0.9,
         },
@@ -41,23 +87,47 @@ export function buildFallbackStyle(): StyleSpecification {
   };
 }
 
+/** Minimal — jaringan memblokir semua tile CDN: dark bg + marker saja. */
+export function buildMinimalStyle(): StyleSpecification {
+  return {
+    version: 8,
+    glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+    sources: {},
+    layers: [
+      {
+        id: "bg",
+        type: "background",
+        paint: { "background-color": "#0D1B2A" },
+      },
+    ],
+  };
+}
+
+let _styleCache: { style: StyleSpecification; name: string } | null = null;
+
 /**
- * Muat style basemap dengan fallback:
- * 1. fetch CARTO dark GL → 2. gagal → fallback raster OSM dim → 3. gagal → style minimal.
- * Map TIDAK PERNAH blank karena style gagal.
+ * Pilih basemap berdasarkan PROBE aktual — bukan asumsi.
+ * carto-raster → osm-fallback → minimal.
+ * Hasil di-cache per page load (probe tidak diulang saat remount/hot-reload).
  */
 export async function loadMapStyle(): Promise<{
   style: StyleSpecification;
   name: string;
 }> {
-  try {
-    const res = await fetch(MAP_STYLE_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const style = (await res.json()) as StyleSpecification;
-    return { style, name: "carto-dark" };
-  } catch {
-    return { style: buildFallbackStyle(), name: "osm-fallback" };
+  if (_styleCache) return _styleCache;
+
+  let result: { style: StyleSpecification; name: string };
+  if (await probeUrl("https://a.basemaps.cartocdn.com/dark_all/4/8/5.png")) {
+    result = { style: buildCartoRasterStyle(), name: "carto-raster" };
+  } else if (await probeUrl("https://tile.openstreetmap.org/4/8/5.png")) {
+    result = { style: buildFallbackStyle(), name: "osm-fallback" };
+  } else {
+    result = { style: buildMinimalStyle(), name: "minimal" };
   }
+
+  console.log("[map] basemap dipilih:", result.name);
+  _styleCache = result;
+  return result;
 }
 
 export const INDONESIA_CENTER: [number, number] = [117.5, -2.3];
@@ -65,7 +135,6 @@ export const INDONESIA_BBOX: [[number, number], [number, number]] = [
   [94.5, -11.2],
   [141.5, 6.5],
 ];
-/** Batas pan — longgar agar nyaman, user tetap terorientasi ke Indonesia. */
 export const INDONESIA_MAX_BOUNDS: [[number, number], [number, number]] = [
   [85.0, -20.0],
   [152.0, 15.0],
@@ -83,7 +152,7 @@ export const EQ_LAYERS = {
   point: "idic-eq-point",
 } as const;
 
-// ── GeoJSON internal (struktural — tanpa import @types/geojson) ──
+// ── GeoJSON internal ──
 
 export interface QuakeProperties {
   id: number;
@@ -95,7 +164,6 @@ export interface QuakeProperties {
   category: MagnitudeCategory;
   potential_tsunami: boolean;
   recent: boolean;
-  /** Offset fase 0..1 → ripple tiap event berdenyut dengan jeda berbeda */
   phase: number;
 }
 
@@ -148,7 +216,7 @@ export function hasRecentEvents(geo: QuakeFeatureCollection): boolean {
   return geo.features.some((f) => f.properties.recent);
 }
 
-// ── Cast helpers: layer/source spec JSON → tipe maplibre yang ketat ──
+// ── Cast helpers ──
 
 type AnyLayer = Parameters<MLMap["addLayer"]>[0];
 type AnySource = Parameters<MLMap["addSource"]>[1];
