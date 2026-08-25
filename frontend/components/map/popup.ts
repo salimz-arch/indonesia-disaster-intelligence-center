@@ -33,6 +33,7 @@ function row(label: string, value: string): string {
   </tr>`;
 }
 
+/** Popup card — match Overview card style: radius 14px, border #203B56, dark #13263A. */
 export function earthquakePopupHtml(d: QuakePopupData): string {
   const color = CATEGORY_COLOR[d.category];
   const loc =
@@ -43,11 +44,16 @@ export function earthquakePopupHtml(d: QuakePopupData): string {
 
   return `
   <div style="
-    min-width:min(240px,68vw);max-width:100%;
-    background:#13263A;color:#F8FAFC;
-    border:1px solid #2A4A6B;border-radius:10px;
-    padding:0;font-family:var(--font-geist-sans),system-ui,sans-serif;
+    min-width:min(180px,55vw);
+    max-width:min(200px,70vw);
+    background:#13263A;
+    color:#F8FAFC;
+    border:1px solid #203B56;
+    border-radius:14px;
+    padding:0;
+    font-family:var(--font-geist-sans),system-ui,sans-serif;
     overflow:hidden;
+    box-shadow:0 8px 24px rgba(2,8,20,0.5);
   ">
     <div style="padding:10px 14px;border-bottom:1px solid #1E3550;">
       <div style="font-size:9px;font-weight:700;letter-spacing:.2em;color:#64748B;">EARTHQUAKE</div>

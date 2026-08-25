@@ -224,7 +224,7 @@ export function attachEarthquakeInteractions(map: MLMap): void {
       offset: 16,
       closeButton: true,
       closeOnClick: true,
-      maxWidth: "min(260px, 72vw)",
+      maxWidth: "min(200px, 70vw)",
     })
       .setLngLat(coords)
       .setHTML(earthquakePopupHtml(data))

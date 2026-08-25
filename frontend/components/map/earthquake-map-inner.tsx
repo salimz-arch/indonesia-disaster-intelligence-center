@@ -110,6 +110,10 @@ export function EarthquakeMapInner({
             new NavigationControl({ showCompass: false }),
             "bottom-right",
           );
+          const compass = containerRef.current?.querySelector(
+            ".maplibregl-ctrl-compass",
+          );
+          compass?.remove();
 
           mapRef.current = m;
           setMapReady(true);
