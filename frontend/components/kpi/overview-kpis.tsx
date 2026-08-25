@@ -20,8 +20,7 @@ import {
 } from "@/hooks/use-weather";
 import { INTENSITY_COLOR } from "@/lib/severity";
 
-/** 6 KPI §15 — semua dari data live. "Active Alerts" menyusul di Step 15. */
-export function OverviewKpis() {
+export function OverviewKpis({ locationId }: { locationId: number | null }) {
   const count24 = useEarthquakeCount(24);
   const countM5 = useEarthquakeCount(24, 5);
   const weather = useLatestWeather();
@@ -35,17 +34,17 @@ export function OverviewKpis() {
     return m;
   }, [locations.data]);
 
-  // Lokasi referensi: Jakarta, fallback item pertama
   const primaryWeather = useMemo(() => {
     const items = weather.data?.data.items ?? [];
+    if (locationId)
+      return items.find((w) => w.location_id === locationId) ?? null;
     return (
       items.find((w) => locMap.get(w.location_id) === "Jakarta") ??
       items[0] ??
       null
     );
-  }, [weather.data, locMap]);
+  }, [weather.data, locMap, locationId]);
 
-  // Hujan puncak: lokasi dengan rainfall 1 jam tertinggi
   const peakRain = useMemo(() => {
     const items = rainfall.data?.data.items ?? [];
     if (items.length === 0) return null;
@@ -58,6 +57,9 @@ export function OverviewKpis() {
     sources.data?.data.items.filter((s) => s.status === "online").length ??
     null;
   const totalSources = sources.data?.data.items.length ?? null;
+  const locName = primaryWeather
+    ? (locMap.get(primaryWeather.location_id) ?? null)
+    : null;
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
@@ -67,6 +69,7 @@ export function OverviewKpis() {
         value={count24.data ?? null}
         loading={count24.isLoading}
         error={count24.isError ? "gagal memuat" : null}
+        footer={<KpiFooter>Semua magnitudo</KpiFooter>}
       />
       <KpiCard
         icon={Zap}
@@ -75,6 +78,7 @@ export function OverviewKpis() {
         accent="#F59E0B"
         loading={countM5.isLoading}
         error={countM5.isError ? "gagal memuat" : null}
+        footer={<KpiFooter>Signifikan</KpiFooter>}
       />
       <KpiCard
         icon={Thermometer}
@@ -83,7 +87,7 @@ export function OverviewKpis() {
         unit="°C"
         format={(v) => v.toFixed(1)}
         loading={weather.isLoading}
-        footer={<KpiFooter>Jakarta</KpiFooter>}
+        footer={<KpiFooter>{locName ?? "—"}</KpiFooter>}
       />
       <KpiCard
         icon={Wind}
@@ -92,7 +96,7 @@ export function OverviewKpis() {
         unit="km/h"
         format={(v) => v.toFixed(0)}
         loading={weather.isLoading}
-        footer={<KpiFooter>Jakarta</KpiFooter>}
+        footer={<KpiFooter>{locName ?? "—"}</KpiFooter>}
       />
       <KpiCard
         icon={CloudRain}

@@ -17,7 +17,11 @@ import { WeatherIcon, weatherColor } from "@/components/weather/weather-icon";
 import { useLatestWeather, useLocations } from "@/hooks/use-weather";
 import { windDirectionLabel } from "@/lib/format";
 
-export function WeatherConditionCard() {
+export function WeatherConditionCard({
+  locationId,
+}: {
+  locationId: number | null;
+}) {
   const weather = useLatestWeather();
   const locations = useLocations();
 
@@ -29,12 +33,14 @@ export function WeatherConditionCard() {
 
   const primary = useMemo(() => {
     const items = weather.data?.data.items ?? [];
+    if (locationId)
+      return items.find((w) => w.location_id === locationId) ?? null;
     return (
       items.find((w) => locMap.get(w.location_id) === "Jakarta") ??
       items[0] ??
       null
     );
-  }, [weather.data, locMap]);
+  }, [weather.data, locMap, locationId]);
 
   const locationName = primary
     ? (locMap.get(primary.location_id) ?? null)
@@ -82,7 +88,7 @@ export function WeatherConditionCard() {
                 {primary.temperature_c.toFixed(1)}°
               </div>
               <div
-                className="mt-1 wrap-break-words text-sm font-medium"
+                className="mt-1 break-words text-sm font-medium"
                 style={{ color: weatherColor(primary.condition_code) }}
               >
                 {primary.condition_text}
@@ -161,8 +167,7 @@ function Metric({
         <Icon size={12} className="shrink-0" aria-hidden />
         <span className="min-w-0 truncate">{label}</span>
       </div>
-      {/* break-words: nilai boleh pindah baris, tidak memaksa lebar metric */}
-      <div className="mt-1 wrap-break-words font-mono text-sm tabular-nums">
+      <div className="mt-1 break-words font-mono text-sm tabular-nums">
         {value}
       </div>
     </div>
