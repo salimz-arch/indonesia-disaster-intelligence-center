@@ -25,38 +25,6 @@ async function probeUrl(url: string, timeoutMs = 4000): Promise<boolean> {
   }
 }
 
-interface VectorLikeSource {
-  type: string;
-  tiles?: string[];
-}
-
-/** Muat GL style + probe SATU tile vector aktual. Lolos → GL vector. Gagal → null. */
-async function loadGlStyle(): Promise<StyleSpecification | null> {
-  try {
-    const res = await fetch(MAP_STYLE_URL, { cache: "no-store" });
-    if (!res.ok) return null;
-    const style = (await res.json()) as StyleSpecification & {
-      sources: Record<string, VectorLikeSource>;
-    };
-
-    const vectorSource = Object.values(style.sources ?? {}).find(
-      (s) =>
-        s?.type === "vector" && Array.isArray(s.tiles) && s.tiles.length > 0,
-    );
-    if (!vectorSource?.tiles) return null;
-
-    const sampleTile = vectorSource.tiles[0]
-      .replace("{z}", "4")
-      .replace("{x}", "8")
-      .replace("{y}", "5");
-    if (!(await probeUrl(sampleTile))) return null;
-
-    return style;
-  } catch {
-    return null;
-  }
-}
-
 /**
  * Esri World Dark Gray — gratis, TANPA API key, dark theme, semua zoom level.
  * Dua source: base (garis/area) + reference (label terang).
@@ -163,7 +131,7 @@ export async function loadMapStyle(): Promise<{
 
   let result: { style: StyleSpecification; name: string };
 
-   if (
+  if (
     await probeUrl(
       "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/4/5/8",
     )
