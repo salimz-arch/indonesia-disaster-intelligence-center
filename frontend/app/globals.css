@@ -168,3 +168,131 @@
   color: #94a3b8 !important;
   font-size: 10px !important;
 }
+/* ═══ Weather animations (§9) — CSS murni, ringan, respects reduced motion ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .wx-anim * {
+    animation: none !important;
+  }
+}
+
+/* Matahari: sinar berputar pelan */
+@keyframes wx-sun-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.wx-sun-rays {
+  animation: wx-sun-spin 24s linear infinite;
+  transform-origin: center;
+}
+
+/* Partikel: melayang naik perlahan */
+@keyframes wx-float-up {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-18px) scale(0.6);
+    opacity: 0;
+  }
+}
+.wx-particle {
+  animation: wx-float-up 3s ease-in-out infinite;
+}
+
+/* Awan: bergerak horizontal bolak-balik */
+@keyframes wx-cloud-drift {
+  0%,
+  100% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+.wx-cloud {
+  animation: wx-cloud-drift 8s ease-in-out infinite;
+}
+
+/* Hujan: tetesan jatuh */
+@keyframes wx-rain-fall {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+.wx-raindrop {
+  animation: wx-rain-fall 1.1s linear infinite;
+}
+
+/* Kilat: flash dua kali lalu jeda panjang */
+@keyframes wx-lightning {
+  0%,
+  88%,
+  100% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0.2;
+  }
+  94% {
+    opacity: 0.9;
+  }
+  96% {
+    opacity: 0;
+  }
+}
+.wx-lightning {
+  animation: wx-lightning 6s ease-out infinite;
+}
+
+/* Kabut: mengalir */
+@keyframes wx-fog-flow {
+  0%,
+  100% {
+    transform: translateX(-2px);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateX(2px);
+    opacity: 0.45;
+  }
+}
+.wx-fog {
+  animation: wx-fog-flow 6s ease-in-out infinite;
+}
+
+/* Angin: garis bergerak */
+@keyframes wx-wind-gust {
+  0% {
+    transform: translateX(-6px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(6px);
+    opacity: 0;
+  }
+}
+.wx-wind {
+  animation: wx-wind-gust 2.5s ease-in-out infinite;
+}

@@ -2,7 +2,7 @@ import type { Map as MLMap, StyleSpecification } from "maplibre-gl";
 
 import type { Earthquake, MagnitudeCategory } from "@/types/api";
 
-/** CARTO Dark Matter GL — label terang & tajam (primary). */
+/** CARTO Dark Matter GL — label terang & tajam (primary, jika vector tile reachable). */
 export const MAP_STYLE_URL =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
@@ -30,11 +30,7 @@ interface VectorLikeSource {
   tiles?: string[];
 }
 
-/**
- * Muat GL style + probe SATU tile vector aktual dari URL pattern style
- * (bukan asumsi): style.json bisa 200 sementara tile-nya diblokir jaringan.
- * Lolos probe → GL vector (label terang). Gagal → null (ladder lanjut).
- */
+/** Muat GL style + probe SATU tile vector aktual. Lolos → GL vector. Gagal → null. */
 async function loadGlStyle(): Promise<StyleSpecification | null> {
   try {
     const res = await fetch(MAP_STYLE_URL, { cache: "no-store" });
@@ -61,22 +57,33 @@ async function loadGlStyle(): Promise<StyleSpecification | null> {
   }
 }
 
-/** CARTO raster dark — label tertanam di tile, tanpa dependency vector. */
-export function buildCartoRasterStyle(): StyleSpecification {
+/**
+ * Esri World Dark Gray — gratis, TANPA API key, dark theme, semua zoom level.
+ * Dua source: base (garis/area) + reference (label terang).
+ * URL tile Esri: {z}/{y}/{x} — y SEBELUM x.
+ */
+export function buildEsriDarkStyle(): StyleSpecification {
   return {
     version: 8,
     glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
     sources: {
-      "carto-raster": {
+      "esri-dark-base": {
         type: "raster",
         tiles: [
-          "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-          "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-          "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+          "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
         ],
         tileSize: 256,
-        maxzoom: 19,
-        attribution: "© OpenStreetMap contributors © CARTO",
+        maxzoom: 16,
+        attribution: "© Esri, © OpenStreetMap contributors",
+      },
+      "esri-dark-labels": {
+        type: "raster",
+        tiles: [
+          "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+        ],
+        tileSize: 256,
+        maxzoom: 16,
+        attribution: "",
       },
     },
     layers: [
@@ -85,7 +92,8 @@ export function buildCartoRasterStyle(): StyleSpecification {
         type: "background",
         paint: { "background-color": "#07111F" },
       },
-      { id: "carto-dark-tiles", type: "raster", source: "carto-raster" },
+      { id: "esri-base", type: "raster", source: "esri-dark-base" },
+      { id: "esri-labels", type: "raster", source: "esri-dark-labels" },
     ],
   };
 }
@@ -145,8 +153,7 @@ let _styleCache: { style: StyleSpecification; name: string } | null = null;
 
 /**
  * Ladder basemap berbasis PROBE aktual:
- * carto-gl (vector, label terang) → carto-raster → osm → minimal.
- * Hasil di-cache per page load.
+ * carto-gl (vector) → esri-dark (raster, no API key) → osm → minimal.
  */
 export async function loadMapStyle(): Promise<{
   style: StyleSpecification;
@@ -156,13 +163,12 @@ export async function loadMapStyle(): Promise<{
 
   let result: { style: StyleSpecification; name: string };
 
-  const gl = await loadGlStyle();
-  if (gl) {
-    result = { style: gl, name: "carto-gl" };
-  } else if (
-    await probeUrl("https://a.basemaps.cartocdn.com/dark_all/4/8/5.png")
+   if (
+    await probeUrl(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/4/5/8",
+    )
   ) {
-    result = { style: buildCartoRasterStyle(), name: "carto-raster" };
+    result = { style: buildEsriDarkStyle(), name: "esri-dark" };
   } else if (await probeUrl("https://tile.openstreetmap.org/4/8/5.png")) {
     result = { style: buildFallbackStyle(), name: "osm-fallback" };
   } else {

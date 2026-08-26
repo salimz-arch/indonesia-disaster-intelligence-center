@@ -87,6 +87,7 @@ export function EarthquakeMapInner({
           center: INDONESIA_CENTER,
           zoom: DEFAULT_ZOOM,
           minZoom: 1.8,
+          maxZoom: 16,
         });
 
         map.on("error", (e) => {
