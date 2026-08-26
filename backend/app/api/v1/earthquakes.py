@@ -4,9 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
 from app.api.envelope import ok
-from app.services.earthquake_service import get_latest, get_recent
+from app.core.cache import cache_get_json, cache_set_json
+from app.services.earthquake_service import get_latest, get_recent, get_stats
 
 router = APIRouter(prefix="/earthquakes", tags=["earthquakes"])
+
+STATS_CACHE_TTL = 60  # detik — seirama invalidasi ingest
 
 
 @router.get("/latest")
@@ -23,6 +26,21 @@ async def latest_earthquakes(
         },
         source="database",
     )
+
+
+@router.get("/stats")
+async def earthquake_stats(
+    hours: int = Query(24, ge=1, le=2160, description="Rentang waktu (jam)"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Statistik agregat: total, terbesar, distribusi magnitude, kedalaman rata-rata."""
+    key = f"eq:stats:{hours}"
+    cached = await cache_get_json(key)
+    if cached is not None:
+        return ok(cached, source="database")
+    stats = await get_stats(db, hours)
+    await cache_set_json(key, stats, STATS_CACHE_TTL)
+    return ok(stats, source="database")
 
 
 @router.get("")

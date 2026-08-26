@@ -152,3 +152,13 @@ export interface ListData<T> {
   items: T[];
   total: number;
 }
+
+/** GET /earthquakes/stats */
+export interface EarthquakeStats {
+  hours: number;
+  total: number;
+  max_magnitude: Earthquake | null;
+  recent: Earthquake | null;
+  avg_depth_km: number | null;
+  distribution: Partial<Record<MagnitudeCategory, number>>;
+}

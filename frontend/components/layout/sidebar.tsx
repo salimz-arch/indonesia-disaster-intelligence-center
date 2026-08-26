@@ -12,7 +12,7 @@ import {
   Map,
   Settings,
   Siren,
-  Mountain,
+  Activity,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -35,7 +35,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: "Monitoring",
     items: [
-      { href: "/earthquake", label: "Earthquake", icon: Mountain },
+      { href: "/earthquake", label: "Earthquake", icon: Activity },
       { href: "/weather", label: "Weather", icon: CloudSun },
       { href: "/rainfall", label: "Rainfall", icon: CloudRain },
       { href: "/disaster", label: "Disaster", icon: Siren },

@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
-from app.core.logging import setup_logging
 from app.core.error_middleware import ErrorHandlingMiddleware  # <-- IMPORT BARU
+from app.core.logging import setup_logging
 from app.db.redis import close_redis, init_redis, ping_redis
 from app.db.session import dispose_engine, ping_database
 from app.providers.base import close_http_client
@@ -86,7 +86,7 @@ def create_app() -> FastAPI:
 
     # ── 2. Error Handler (Lapisan DALAM) ──
     # Menangkap exception (misal DB timeout) dan mengembalikan 503 JSON.
-    # Karena ditaruh SETELAH CORS, response error ini tetap akan memiliki 
+    # Karena ditaruh SETELAH CORS, response error ini tetap akan memiliki
     # header CORS yang valid, mencegah error palsu di browser.
     app.add_middleware(ErrorHandlingMiddleware)
 

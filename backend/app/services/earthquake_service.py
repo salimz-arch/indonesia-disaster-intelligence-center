@@ -1,4 +1,4 @@
-"""Earthquake service — ingest (dedup 2 lapis) + query + cache hot path."""
+"""Earthquake service — ingest (dedup 2 lapis) + query + stats + cache."""
 import asyncio
 import logging
 from dataclasses import dataclass
@@ -42,11 +42,7 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 def _is_similar(row: Earthquake, event: EarthquakeCreate) -> bool:
-    """Event yang sama dari provider lain? (Δt≤150s, Δjarak≤100km, ΔM≤0.8).
-
-    Mencegah marker ganda di map & double-count KPI saat BMKG dan USGS
-    melaporkan gempa yang sama.
-    """
+    """Event sama dari provider lain? (Δt≤150s, Δjarak≤100km, ΔM≤0.8)."""
     if abs(row.magnitude - event.magnitude) > MAGNITUDE_TOLERANCE:
         return False
     if abs((row.event_time - event.event_time).total_seconds()) > (
@@ -94,7 +90,8 @@ async def ingest_earthquakes(
         if result.inserted:
             await session.commit()
     if result.inserted:
-        await cache_delete_pattern("eq:latest:*")
+        # Invalidasi SEMUA cache earthquake: latest + stats
+        await cache_delete_pattern("eq:*")
     return result
 
 
@@ -146,3 +143,79 @@ async def get_recent(
         EarthquakeRead.model_validate(row) for row in (await session.scalars(stmt)).all()
     ]
     return items, total or 0
+
+
+# ── Stats (modul earthquake § Step 9) ──
+
+# Band kategori — HARUS sinkron dengan MagnitudeCategory frontend/backend
+_MAGNITUDE_BANDS: list[tuple[str, float | None, float | None]] = [
+    ("low", None, 3.0),
+    ("moderate", 3.0, 4.0),
+    ("significant", 4.0, 5.0),
+    ("strong", 5.0, 6.0),
+    ("major", 6.0, 7.0),
+    ("severe", 7.0, None),
+]
+
+
+async def get_stats(session: AsyncSession, hours: int = 24) -> dict:
+    """Statistik agregat window waktu — JSON-serializable (siap cache + envelope)."""
+    since = datetime.now(UTC) - timedelta(hours=hours)
+    base = Earthquake.event_time >= since
+
+    total = await session.scalar(
+        sa.select(sa.func.count()).select_from(Earthquake).where(base)
+    )
+
+    strongest = (
+        await session.scalars(
+            sa.select(Earthquake)
+            .where(base)
+            .order_by(Earthquake.magnitude.desc(), Earthquake.event_time.desc())
+            .limit(1)
+        )
+    ).first()
+
+    recent = (
+        await session.scalars(
+            sa.select(Earthquake)
+            .where(base)
+            .order_by(Earthquake.event_time.desc())
+            .limit(1)
+        )
+    ).first()
+
+    avg_depth = await session.scalar(
+        sa.select(sa.func.avg(Earthquake.depth_km)).where(base)
+    )
+
+    distribution: dict[str, int] = {}
+    for name, lo, hi in _MAGNITUDE_BANDS:
+        conditions = [base]
+        if lo is not None:
+            conditions.append(Earthquake.magnitude >= lo)
+        if hi is not None:
+            conditions.append(Earthquake.magnitude < hi)
+        count = await session.scalar(
+            sa.select(sa.func.count())
+            .select_from(Earthquake)
+            .where(sa.and_(*conditions))
+        )
+        distribution[name] = count or 0
+
+    return {
+        "hours": hours,
+        "total": total or 0,
+        "max_magnitude": (
+            EarthquakeRead.model_validate(strongest).model_dump(mode="json")
+            if strongest
+            else None
+        ),
+        "recent": (
+            EarthquakeRead.model_validate(recent).model_dump(mode="json")
+            if recent
+            else None
+        ),
+        "avg_depth_km": round(avg_depth, 1) if avg_depth is not None else None,
+        "distribution": distribution,
+    }

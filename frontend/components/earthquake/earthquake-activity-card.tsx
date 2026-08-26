@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Mountain } from "lucide-react";
+import { ArrowRight, Activity } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -21,7 +21,7 @@ export function EarthquakeActivityCard() {
     <section className="min-w-0 w-full rounded-2xl border border-idic-border bg-idic-card p-5">
       <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
         <h2 className="flex shrink-0 items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
-          <Mountain size={14} className="text-idic-cyan" aria-hidden />
+          <Activity size={14} className="text-idic-cyan" aria-hidden />
           Earthquake Activity
         </h2>
 
