@@ -108,13 +108,13 @@ export function RainfallHistoryChart({
             {buckets.map((_, i) => (
               <div
                 key={i}
-                className="min-w-0 flex-1 text-center text-[9px] tabular-nums text-slate-600"
+                className="min-w-0 flex-1 text-center text-[9px] tabular-nums text-slate-400"
               >
                 {i % labelEvery === 0 ? buckets[i].label : ""}
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[10px] text-slate-600">
+          <p className="mt-3 text-[10px] text-slate-400">
             Tinggi bar = curah per jam (mm). Warna mengikuti klasifikasi
             intensitas internal. Waktu dalam WIB.
           </p>

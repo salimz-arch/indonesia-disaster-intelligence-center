@@ -45,14 +45,20 @@ export function RainfallCityGrid({
                 )}
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium">
+                  <span className="block truncate text-sm font-medium text-slate-200">
                     {locMap.get(r.location_id) ?? `Lokasi ${r.location_id}`}
                   </span>
                   <span className="mt-0.5 block font-mono text-[11px] tabular-nums text-slate-400">
-                    1j {r.rainfall_1h_mm.toFixed(1)} · 24j{" "}
-                    {r.rainfall_24h_mm !== null
-                      ? r.rainfall_24h_mm.toFixed(0)
-                      : "—"}{" "}
+                    1j{" "}
+                    <span className="text-slate-200">
+                      {r.rainfall_1h_mm.toFixed(1)}
+                    </span>{" "}
+                    · 24j{" "}
+                    <span className="text-slate-200">
+                      {r.rainfall_24h_mm !== null
+                        ? r.rainfall_24h_mm.toFixed(0)
+                        : "—"}
+                    </span>{" "}
                     mm
                   </span>
                 </span>

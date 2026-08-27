@@ -47,16 +47,16 @@ export function RainfallMonitorPanel({
           {INTENSITY_LABEL[observation.intensity]}
         </span>
         <div className="min-w-0">
-          <div className="font-mono text-3xl font-semibold tabular-nums">
+          <div className="font-mono text-3xl font-semibold tabular-nums text-slate-100">
             {observation.rainfall_1h_mm.toFixed(1)}
-            <span className="ml-1 text-sm font-normal text-slate-400">
+            <span className="ml-1.5 text-sm font-normal text-slate-400">
               mm / 1 jam
             </span>
           </div>
         </div>
       </div>
 
-      {/* Akumulasi */}
+      {/* Akumulasi — nilai TERANG, label abu */}
       <div className="mt-4 grid grid-cols-3 gap-2">
         <Accum label="1 Jam" value={observation.rainfall_1h_mm} />
         <Accum label="6 Jam" value={observation.rainfall_6h_mm} />
@@ -78,7 +78,7 @@ export function RainfallMonitorPanel({
             />
           ))}
         </div>
-        <div className="mt-1.5 flex justify-between text-[9px] uppercase tracking-wide text-slate-600">
+        <div className="mt-1.5 flex justify-between text-[9px] uppercase tracking-wide text-slate-500">
           <span>None</span>
           <span>Light</span>
           <span>Moderate</span>
@@ -104,9 +104,12 @@ function Accum({ label, value }: { label: string; value: number | null }) {
       <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
         {label}
       </div>
-      <div className="mt-1 font-mono text-lg font-semibold tabular-nums">
+      <div className="mt-1 font-mono text-lg font-semibold tabular-nums text-slate-100">
         {value !== null ? value.toFixed(1) : "—"}
-        <span className="text-[10px] font-normal text-slate-500"> mm</span>
+        <span className="ml-0.5 text-[10px] font-normal text-slate-500">
+          {" "}
+          mm
+        </span>
       </div>
     </div>
   );
