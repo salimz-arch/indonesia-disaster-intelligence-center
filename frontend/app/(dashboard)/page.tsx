@@ -11,6 +11,7 @@ import { OverviewKpis } from "@/components/kpi/overview-kpis";
 import { EarthquakeMap } from "@/components/map/earthquake-map";
 import { WeatherConditionCard } from "@/components/weather/weather-condition-card";
 import { useLocations } from "@/hooks/use-weather";
+import { AiAnalysisPanel } from "@/components/ai/ai-analysis-panel";
 
 export default function OverviewPage() {
   const [locationId, setLocationId] = useState<number | null>(null);
@@ -42,6 +43,14 @@ export default function OverviewPage() {
         <WeatherConditionCard locationId={locationId} />
         <EarthquakeActivityCard />
       </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <WeatherConditionCard locationId={locationId} />
+        <EarthquakeActivityCard />
+      </div>
+
+      {/* AI Situation Analysis (§18) */}
+      <AiAnalysisPanel />
 
       <SystemStatusCard />
       <Disclaimer />

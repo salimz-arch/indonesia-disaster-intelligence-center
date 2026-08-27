@@ -162,3 +162,32 @@ export interface EarthquakeStats {
   avg_depth_km: number | null;
   distribution: Partial<Record<MagnitudeCategory, number>>;
 }
+
+/** POST /ai/analyze */
+export type RiskLevel = "low" | "moderate" | "high" | "critical";
+
+export interface RiskFactor {
+  code: string;
+  label: string;
+  points: number;
+}
+
+export interface AIAnalysis {
+  risk_score: number;
+  risk_level: RiskLevel;
+  factors: RiskFactor[];
+  generated_at: string;
+  provider: string;
+  model: string;
+  current_situation: string;
+  main_factors: string[];
+  areas_of_concern: string[];
+  recommended_monitoring: string;
+  limitations: string;
+  data_coverage: {
+    earthquakes_24h: number;
+    weather_locations: number;
+    rainfall_locations: number;
+    window_hours: number;
+  };
+}
