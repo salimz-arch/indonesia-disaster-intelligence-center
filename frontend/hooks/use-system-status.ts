@@ -1,17 +1,25 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 
 import { apiGet } from "@/lib/api-client";
 import { useRealtimeStore } from "@/stores/realtime-store";
 import type { HealthData } from "@/types/api";
 
-export type SystemStatus = "connecting" | "live" | "degraded" | "offline";
+export type SystemStatus =
+  | "connecting"
+  | "live"
+  | "degraded"
+  | "reconnecting"
+  | "offline";
 
-/** Derive status header dari /health polling (Step 12: digantikan SSE heartbeat). */
+/**
+ * Status header = SSE (koneksi realtime) + /health (kesehatan infra).
+ * Prioritas: reconnecting > offline > degraded > live > connecting.
+ * SSE dimiliki use-realtime; hook ini hanya membaca store.
+ */
 export function useSystemStatus() {
-  const setConnection = useRealtimeStore((s) => s.setConnection);
+  const connection = useRealtimeStore((s) => s.connection);
 
   const query = useQuery({
     queryKey: ["health"],
@@ -22,17 +30,22 @@ export function useSystemStatus() {
   });
 
   const health = query.data?.data;
-  const status: SystemStatus = query.isError
-    ? "offline"
-    : health
-      ? health.components.database === "ok" && health.components.cache === "ok"
-        ? "live"
-        : "degraded"
-      : "connecting";
 
-  useEffect(() => {
-    setConnection(status);
-  }, [status, setConnection]);
+  let status: SystemStatus;
+  if (connection === "reconnecting") {
+    status = "reconnecting";
+  } else if (query.isError) {
+    status = "offline";
+  } else if (
+    health &&
+    (health.components.database !== "ok" || health.components.cache !== "ok")
+  ) {
+    status = "degraded";
+  } else if (connection === "live") {
+    status = "live";
+  } else {
+    status = "connecting";
+  }
 
   return { status, health };
 }

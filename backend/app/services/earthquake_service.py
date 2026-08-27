@@ -1,7 +1,7 @@
 """Earthquake service — ingest (dedup 2 lapis) + query + stats + cache."""
 import asyncio
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
 
@@ -30,6 +30,8 @@ class IngestResult:
     inserted: int = 0
     duplicate: int = 0
     similar: int = 0
+    inserted_events: list[EarthquakeRead] = field(default_factory=list)
+
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -55,26 +57,19 @@ def _is_similar(row: Earthquake, event: EarthquakeCreate) -> bool:
     )
 
 
-async def ingest_earthquakes(
-    session: AsyncSession, events: list[EarthquakeCreate]
-) -> IngestResult:
-    """Simpan event baru; duplikat/similar dilewati. Satu SELECT + satu commit."""
+async def ingest_earthquakes(session: AsyncSession, events: list[EarthquakeCreate]) -> IngestResult:
     result = IngestResult()
     if not events:
         return result
     async with _ingest_lock:
         min_t = min(e.event_time for e in events) - TIME_TOLERANCE
         max_t = max(e.event_time for e in events) + TIME_TOLERANCE
-        rows = list(
-            (
-                await session.scalars(
-                    sa.select(Earthquake).where(
-                        Earthquake.event_time.between(min_t, max_t)
-                    )
-                )
-            ).all()
-        )
+
+        stmt = sa.select(Earthquake).where(Earthquake.event_time.between(min_t, max_t))
+
+        rows = list((await session.scalars(stmt)).all())
         known = {(r.provider, r.source_id) for r in rows}
+        inserted_rows: list[Earthquake] = []
         for event in events:
             if (event.provider, event.source_id) in known:
                 result.duplicate += 1
@@ -85,14 +80,16 @@ async def ingest_earthquakes(
             row = Earthquake(**event.model_dump())
             session.add(row)
             rows.append(row)
+            inserted_rows.append(row)
             known.add((event.provider, event.source_id))
             result.inserted += 1
         if result.inserted:
             await session.commit()
+            result.inserted_events = [EarthquakeRead.model_validate(r) for r in inserted_rows]
     if result.inserted:
-        # Invalidasi SEMUA cache earthquake: latest + stats
         await cache_delete_pattern("eq:*")
     return result
+
 
 
 async def get_latest(session: AsyncSession, limit: int = 20) -> list[EarthquakeRead]:

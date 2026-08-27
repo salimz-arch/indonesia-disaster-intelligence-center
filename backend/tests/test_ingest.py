@@ -29,6 +29,9 @@ async def test_ingest_inserts_new_events(db_session):
         db_session, [_event(), _event(source_id="e2", minutes_ago=60)]
     )
     assert result.inserted == 2
+    assert len(result.inserted_events) == 2
+    assert result.inserted_events[0].id is not None
+    assert result.inserted_events[0].magnitude == 5.0
 
 
 async def test_ingest_exact_duplicate_skipped(db_session):

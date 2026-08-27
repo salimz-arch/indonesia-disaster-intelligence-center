@@ -7,6 +7,7 @@ from app.api.v1.locations import router as locations_router
 from app.api.v1.radar import router as radar_router
 from app.api.v1.rainfall import router as rainfall_router
 from app.api.v1.sources import router as sources_router
+from app.api.v1.stream import router as stream_router
 from app.api.v1.weather import router as weather_router
 
 api_router = APIRouter()
@@ -18,3 +19,4 @@ api_router.include_router(rainfall_router)
 api_router.include_router(locations_router)
 api_router.include_router(sources_router)
 api_router.include_router(radar_router)
+api_router.include_router(stream_router)

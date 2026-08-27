@@ -1,7 +1,7 @@
-"""Periodic ingestion tasks — TIDAK PERNAH raise (§ resilient collector).
+"""Periodic ingestion tasks — TIDAK PERNAH raise.
 
-Kegagalan provider → status degraded di data_sources + log warning;
-siklus berikutnya otomatis mencoba lagi.
+Kegagalan provider → status degraded + log warning; siklus berikutnya retry.
+Ingest sukses → publish realtime event ke EventBus.
 """
 import logging
 from datetime import UTC, datetime, timedelta
@@ -13,6 +13,7 @@ from app.core.config import get_settings
 from app.db.session import AsyncSessionLocal
 from app.models import Location
 from app.providers import get_bmkg_provider, get_usgs_provider, get_weather_provider
+from app.realtime.bus import bus
 from app.services.earthquake_service import ingest_earthquakes
 from app.services.source_service import mark_failure, mark_success
 from app.services.weather_service import ingest_observations
@@ -23,7 +24,9 @@ SRC_BMKG = "bmkg-earthquake"
 SRC_USGS = "usgs-earthquake"
 
 
-async def _mark(names: list[str], *, ok: bool, latency_ms: int = 0, error: str = "") -> None:
+async def _mark(
+    names: list[str], *, ok: bool, latency_ms: int = 0, error: str = ""
+) -> None:
     """Catat status ke data_sources — best effort, tidak pernah raise."""
     try:
         async with AsyncSessionLocal() as session:
@@ -49,6 +52,15 @@ async def collect_bmkg() -> None:
             "bmkg: fetch=%d inserted=%d dup=%d similar=%d (%dms)",
             len(events), result.inserted, result.duplicate, result.similar, latency,
         )
+        if result.inserted:
+            bus.publish(
+                "earthquake.new",
+                {
+                    "events": [
+                        e.model_dump(mode="json") for e in result.inserted_events
+                    ]
+                },
+            )
     except Exception as exc:
         logger.warning("bmkg gagal: %s: %s", exc.__class__.__name__, exc)
         await _mark([SRC_BMKG], ok=False, error=f"{exc.__class__.__name__}: {exc}")
@@ -71,6 +83,15 @@ async def _collect_usgs_window(window: timedelta, label: str) -> None:
             label, len(events), result.inserted, result.duplicate,
             result.similar, latency,
         )
+        if result.inserted:
+            bus.publish(
+                "earthquake.new",
+                {
+                    "events": [
+                        e.model_dump(mode="json") for e in result.inserted_events
+                    ]
+                },
+            )
     except Exception as exc:
         logger.warning("usgs[%s] gagal: %s: %s", label, exc.__class__.__name__, exc)
         await _mark([SRC_USGS], ok=False, error=f"{exc.__class__.__name__}: {exc}")
@@ -82,10 +103,11 @@ async def collect_usgs() -> None:
 
 
 async def collect_usgs_backfill() -> None:
-    """Sekali saat startup: backfill historis utk modul analytics."""
+    """Sekali saat startup: backfill historis untuk modul analytics."""
     settings = get_settings()
     await _collect_usgs_window(
-        timedelta(days=settings.usgs_backfill_days), f"backfill-{settings.usgs_backfill_days}d"
+        timedelta(days=settings.usgs_backfill_days),
+        f"backfill-{settings.usgs_backfill_days}d",
     )
 
 
@@ -110,6 +132,8 @@ async def collect_weather() -> None:
             "weather: %d lokasi → %d weather, %d rainfall (%dms)",
             len(locations), w_count, r_count, latency,
         )
+        if w_count or r_count:
+            bus.publish("weather.update", {"weather": w_count, "rainfall": r_count})
     except Exception as exc:
         logger.warning("weather gagal: %s: %s", exc.__class__.__name__, exc)
         await _mark(source_names, ok=False, error=f"{exc.__class__.__name__}: {exc}")
