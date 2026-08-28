@@ -12,7 +12,7 @@ def get_ai_provider() -> AIProvider:
     if settings.ai_provider == "gemini":
         if not settings.gemini_api_key:
             raise AIProviderError("AI_PROVIDER=gemini tapi GEMINI_API_KEY kosong")
-        return GeminiAIProvider(settings.gemini_api_key)
+        return GeminiAIProvider(settings.gemini_api_key, settings.gemini_model)
     if settings.ai_provider == "openai":
         if not settings.openai_api_key:
             raise AIProviderError("AI_PROVIDER=openai tapi OPENAI_API_KEY kosong")

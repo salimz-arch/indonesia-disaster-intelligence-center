@@ -1,19 +1,15 @@
-"""Canonical AI report schema (§18-19).
-
-risk_score/risk_level = INTERNAL MONITORING SCORE dari Risk Engine
-deterministik — bukan prediksi resmi dan bukan keluaran LLM.
-"""
+"""Canonical AI report schema (Section 18-19)."""
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 
 class RiskLevel(StrEnum):
-    LOW = "low"            # 0-30
-    MODERATE = "moderate"  # 31-60
-    HIGH = "high"          # 61-80
-    CRITICAL = "critical"  # 81-100
+    LOW = "low"
+    MODERATE = "moderate"
+    HIGH = "high"
+    CRITICAL = "critical"
 
 
 def risk_level(score: int) -> RiskLevel:
@@ -36,7 +32,6 @@ class AIReportCreate(BaseModel):
 
 class AIReportRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
     id: int
     provider: str
     model: str
@@ -52,18 +47,27 @@ class AIReportRead(BaseModel):
 
 
 class AISituationOutputSchema(BaseModel):
-    """Validator keluaran provider — struktur WAJIB (§18)."""
-
-    current_situation: str = Field(min_length=10, max_length=2000)
-    main_factors: list[str] = Field(max_length=8)
+    current_situation: str = Field(min_length=20, max_length=1500)
+    main_factors: list[str] = Field(min_length=1, max_length=8)
     areas_of_concern: list[str] = Field(max_length=10)
-    recommended_monitoring: str = Field(min_length=10, max_length=2000)
-    limitations: str = Field(min_length=5, max_length=2000)
+    recommended_monitoring: str = Field(min_length=15, max_length=1000)
+    limitations: str = Field(min_length=10, max_length=1000)
+
+    @field_validator("main_factors")
+    @classmethod
+    def factors_not_empty_strings(cls, v: list[str]) -> list[str]:
+        cleaned = [s.strip() for s in v if s.strip()]
+        if not cleaned:
+            raise ValueError("main_factors tidak boleh kosong")
+        return cleaned
+
+    @field_validator("areas_of_concern")
+    @classmethod
+    def concerns_cleaned(cls, v: list[str]) -> list[str]:
+        return [s.strip() for s in v if s.strip()]
 
 
 class AIAnalyzeResponse(BaseModel):
-    """Respons endpoint /ai/analyze — kontrak frontend."""
-
     risk_score: int
     risk_level: RiskLevel
     factors: list[dict]
@@ -75,4 +79,6 @@ class AIAnalyzeResponse(BaseModel):
     areas_of_concern: list[str]
     recommended_monitoring: str
     limitations: str
-    data_coverage: dict  # ringkasan sumber data yang dipakai
+    data_coverage: dict
+    fallback_used: bool = False
+    provider_error: str | None = None

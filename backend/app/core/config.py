@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     # ── AI ──
     ai_provider: str = "mock"  # mock | gemini | openai
     gemini_api_key: str = ""
+    gemini_model: str = "gemini-1.5-flash"
     openai_api_key: str = ""
 
     @property

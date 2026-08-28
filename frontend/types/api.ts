@@ -190,4 +190,6 @@ export interface AIAnalysis {
     rainfall_locations: number;
     window_hours: number;
   };
+  fallback_used?: boolean;
+  provider_error?: string | null;
 }
