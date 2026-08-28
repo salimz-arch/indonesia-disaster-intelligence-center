@@ -10,6 +10,7 @@ import {
   labelInterval,
 } from "@/lib/chart-theme";
 import { CATEGORY_COLOR } from "@/lib/severity";
+import { WEATHER_CONDITION_META } from "@/lib/weather-colors";
 import type {
   EarthquakeAnalytics,
   MagnitudeCategory,
@@ -283,26 +284,15 @@ export function TemperatureTrendChart({ data }: { data: WeatherAnalytics }) {
   return <EChart option={option} height={240} ariaLabel="Tren suhu" />;
 }
 
-const CONDITION_META: Partial<
-  Record<string, { label: string; color: string }>
-> = {
-  clear: { label: "Cerah", color: "#F59E0B" },
-  partly_cloudy: { label: "Berawan Sebagian", color: "#94A3B8" },
-  cloudy: { label: "Berawan", color: "#64748B" },
-  fog: { label: "Kabut", color: "#8B9DC3" },
-  drizzle: { label: "Gerimis", color: "#38BDF8" },
-  rain: { label: "Hujan", color: "#22D3EE" },
-  heavy_rain: { label: "Hujan Lebat", color: "#F97316" },
-  thunderstorm: { label: "Badai Petir", color: "#F43F5E" },
-  extreme: { label: "Ekstrem", color: "#EF4444" },
-  unknown: { label: "Tidak Diketahui", color: "#475569" },
-};
-
 export function ConditionDonutChart({ data }: { data: WeatherAnalytics }) {
   const entries = Object.entries(data.condition_counts)
     .filter(([, v]) => (v ?? 0) > 0)
     .map(([code, count]) => {
-      const meta = CONDITION_META[code] ?? { label: code, color: "#475569" };
+      // ✅ Menggunakan WEATHER_CONDITION_META dari sumber terpusat
+      const meta = WEATHER_CONDITION_META[code] ?? {
+        label: code,
+        color: "#475569",
+      };
       return {
         value: count ?? 0,
         name: meta.label,

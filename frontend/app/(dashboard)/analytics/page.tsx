@@ -86,6 +86,11 @@ export default function AnalyticsPage() {
             value={s.summary.avg_per_day}
             format={(v) => v.toFixed(1)}
             accent="#38BDF8"
+            footer={
+              <span className="text-[11px] text-slate-500">
+                gempa per hari ({s.summary.total} total ÷ {days} hari)
+              </span>
+            }
           />
           <KpiCard
             icon={Zap}
