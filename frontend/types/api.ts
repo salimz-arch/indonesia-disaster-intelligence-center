@@ -193,3 +193,42 @@ export interface AIAnalysis {
   fallback_used?: boolean;
   provider_error?: string | null;
 }
+export interface EarthquakeAnalytics {
+  days: number;
+  timeline: { date: string; count: number; max_magnitude: number | null }[];
+  distribution: Partial<Record<MagnitudeCategory, number>>;
+  depth_distribution: { shallow: number; intermediate: number; deep: number };
+  by_hour: number[];
+  summary: {
+    total: number;
+    avg_per_day: number;
+    max_magnitude: number | null;
+    max_magnitude_location: string | null;
+    most_active_day: string | null;
+    most_active_day_count: number;
+  };
+}
+export interface RainfallAnalytics {
+  days: number;
+  timeline: {
+    date: string;
+    peak_1h_mm: number | null;
+    peak_24h_mm: number | null;
+    locations_raining: number;
+  }[];
+  top_locations: {
+    name: string;
+    max_1h_mm: number | null;
+    max_24h_mm: number | null;
+  }[];
+}
+export interface WeatherAnalytics {
+  days: number;
+  timeline: {
+    date: string;
+    avg_temp: number | null;
+    min_temp: number | null;
+    max_temp: number | null;
+  }[];
+  condition_counts: Partial<Record<WeatherCondition, number>>;
+}
