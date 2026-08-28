@@ -1,4 +1,5 @@
 """Integration test: ingest dedup (exact + cross-provider similar)."""
+
 from datetime import UTC, datetime, timedelta
 
 from app.schemas.earthquake import EarthquakeCreate

@@ -3,6 +3,7 @@
 Hanya metadata frame (host + path); tile PNG dimuat langsung oleh MapLibre
 di frontend. Endpoint /radar memakai ini untuk animasi frame.
 """
+
 import logging
 from typing import Any
 

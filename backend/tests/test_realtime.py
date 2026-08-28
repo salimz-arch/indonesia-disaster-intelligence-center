@@ -1,4 +1,5 @@
 """Unit test: event bus pub/sub + payload inserted_events."""
+
 import asyncio
 
 from app.realtime.bus import QUEUE_MAXSIZE, bus

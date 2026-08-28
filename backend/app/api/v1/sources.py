@@ -1,4 +1,5 @@
 """Data source status endpoints — Data Source Transparency (§40)."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 

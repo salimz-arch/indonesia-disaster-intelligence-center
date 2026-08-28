@@ -1,7 +1,9 @@
 """Aggregator semua route API v1 — SATU-SATUNYA tempat registrasi router."""
+
 from fastapi import APIRouter
 
 from app.api.v1.ai import router as ai_router
+from app.api.v1.alerts import router as alerts_router
 from app.api.v1.analytics import router as analytics_router
 from app.api.v1.earthquakes import router as earthquakes_router
 from app.api.v1.health import router as health_router
@@ -24,3 +26,4 @@ api_router.include_router(radar_router)
 api_router.include_router(stream_router)
 api_router.include_router(ai_router)
 api_router.include_router(analytics_router)
+api_router.include_router(alerts_router)

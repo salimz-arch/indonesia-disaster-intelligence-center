@@ -3,6 +3,7 @@
 Bukan "AI" — menghasilkan narasi deterministik dari context.
 Jujur soal identitasnya di field limitations.
 """
+
 from typing import ClassVar
 
 from app.ai.base import AIProvider, AISituationOutput

@@ -3,6 +3,7 @@
 Aktif hanya saat DATA_MODE=mock. provider/source = "mock" agar terlihat
 beda dari data live di API.
 """
+
 import asyncio
 import json
 import logging
@@ -61,9 +62,7 @@ class MockWeatherProvider(WeatherProvider):
     def __init__(self) -> None:
         logger.warning("MOCK MODE — weather provider memakai DATA PALSU")
 
-    async def fetch_batch(
-        self, locations: Sequence[LocationRef]
-    ) -> list[LocationObservation]:
+    async def fetch_batch(self, locations: Sequence[LocationRef]) -> list[LocationObservation]:
         payload = await _read_mock("mock_weather.json")
         default = payload["default"]
         overrides = payload.get("locations", {})
@@ -97,8 +96,6 @@ class MockWeatherProvider(WeatherProvider):
                 source="mock",
             )
             results.append(
-                LocationObservation(
-                    location_id=loc.id, weather=weather, rainfall=rainfall
-                )
+                LocationObservation(location_id=loc.id, weather=weather, rainfall=rainfall)
             )
         return results

@@ -1,4 +1,5 @@
 """Entry point IDIC backend."""
+
 import logging
 from contextlib import asynccontextmanager
 

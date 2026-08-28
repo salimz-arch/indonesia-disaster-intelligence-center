@@ -1,4 +1,5 @@
 """Integration test: earthquake stats aggregation."""
+
 from datetime import UTC, datetime, timedelta
 
 from app.schemas.earthquake import EarthquakeCreate

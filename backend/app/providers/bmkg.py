@@ -4,6 +4,7 @@ autogempa.json   = event terbaru (objek tunggal)
 gempaterkini.json = 15 event terakhir M5.0+
 Partial failure ditoleransi: satu endpoint gagal → endpoint lain tetap dipakai.
 """
+
 import logging
 from datetime import datetime
 
@@ -38,8 +39,7 @@ def parse_gempa(raw: dict) -> EarthquakeCreate | None:
             location_text=raw.get("Wilayah"),
             event_time=datetime.fromisoformat(raw["DateTime"]),
             # "tidak berpotensi TSUNAMI" MENGANDUNG kata "berpotensi" — cek prefix!
-            potential_tsunami=("tsunami" in potensi)
-            and (not potensi.startswith("tidak")),
+            potential_tsunami=("tsunami" in potensi) and (not potensi.startswith("tidak")),
         )
     except (KeyError, ValueError, TypeError, IndexError, ValidationError) as exc:
         logger.warning("BMKG event dilewati (invalid): %s", exc)

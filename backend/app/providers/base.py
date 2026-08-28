@@ -2,6 +2,7 @@
 
 Provider = fetch & normalisasi ke canonical schema. TIDAK menyentuh DB.
 """
+
 import asyncio
 import logging
 from abc import ABC, abstractmethod
@@ -34,9 +35,7 @@ def get_http_client() -> httpx.AsyncClient:
         _client = httpx.AsyncClient(
             timeout=httpx.Timeout(10.0, connect=5.0),
             limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
-            headers={
-                "User-Agent": "IDIC/0.1 (Indonesia disaster monitoring dashboard)"
-            },
+            headers={"User-Agent": "IDIC/0.1 (Indonesia disaster monitoring dashboard)"},
             follow_redirects=True,
         )
     return _client
@@ -74,7 +73,11 @@ async def fetch_json(
         if attempt < attempts:
             logger.warning(
                 "fetch %s gagal (%d/%d): %s — retry %.1fs",
-                url, attempt, attempts, last_error, backoff,
+                url,
+                attempt,
+                attempts,
+                last_error,
+                backoff,
             )
             await asyncio.sleep(backoff)
             backoff *= 2
@@ -98,7 +101,5 @@ class WeatherProvider(BaseProvider):
     source_names: ClassVar[tuple[str, ...]] = ()
 
     @abstractmethod
-    async def fetch_batch(
-        self, locations: Sequence[LocationRef]
-    ) -> list[LocationObservation]:
+    async def fetch_batch(self, locations: Sequence[LocationRef]) -> list[LocationObservation]:
         """Ambil observasi cuaca + rainfall untuk batch lokasi."""

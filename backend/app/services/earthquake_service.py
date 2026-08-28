@@ -1,4 +1,5 @@
 """Earthquake service — ingest (dedup 2 lapis) + query + stats + cache."""
+
 import asyncio
 import logging
 from dataclasses import dataclass, field
@@ -33,13 +34,9 @@ class IngestResult:
     inserted_events: list[EarthquakeRead] = field(default_factory=list)
 
 
-
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     rlat1, rlon1, rlat2, rlon2 = map(radians, (lat1, lon1, lat2, lon2))
-    a = (
-        sin((rlat2 - rlat1) / 2) ** 2
-        + cos(rlat1) * cos(rlat2) * sin((rlon2 - rlon1) / 2) ** 2
-    )
+    a = sin((rlat2 - rlat1) / 2) ** 2 + cos(rlat1) * cos(rlat2) * sin((rlon2 - rlon1) / 2) ** 2
     return 2 * 6371.0 * asin(sqrt(a))
 
 
@@ -47,9 +44,7 @@ def _is_similar(row: Earthquake, event: EarthquakeCreate) -> bool:
     """Event sama dari provider lain? (Δt≤150s, Δjarak≤100km, ΔM≤0.8)."""
     if abs(row.magnitude - event.magnitude) > MAGNITUDE_TOLERANCE:
         return False
-    if abs((row.event_time - event.event_time).total_seconds()) > (
-        TIME_TOLERANCE.total_seconds()
-    ):
+    if abs((row.event_time - event.event_time).total_seconds()) > (TIME_TOLERANCE.total_seconds()):
         return False
     return (
         haversine_km(row.latitude, row.longitude, event.latitude, event.longitude)
@@ -91,7 +86,6 @@ async def ingest_earthquakes(session: AsyncSession, events: list[EarthquakeCreat
     return result
 
 
-
 async def get_latest(session: AsyncSession, limit: int = 20) -> list[EarthquakeRead]:
     """Event terbaru — Redis cache first, fallback DB."""
     key = f"eq:latest:{limit}"
@@ -99,12 +93,8 @@ async def get_latest(session: AsyncSession, limit: int = 20) -> list[EarthquakeR
     if cached is not None:
         return [EarthquakeRead.model_validate(item) for item in cached]
     stmt = sa.select(Earthquake).order_by(Earthquake.event_time.desc()).limit(limit)
-    items = [
-        EarthquakeRead.model_validate(row) for row in (await session.scalars(stmt)).all()
-    ]
-    await cache_set_json(
-        key, [item.model_dump(mode="json") for item in items], LATEST_CACHE_TTL
-    )
+    items = [EarthquakeRead.model_validate(row) for row in (await session.scalars(stmt)).all()]
+    await cache_set_json(key, [item.model_dump(mode="json") for item in items], LATEST_CACHE_TTL)
     return items
 
 
@@ -126,9 +116,7 @@ async def get_recent(
         conditions.append(Earthquake.magnitude <= max_magnitude)
     where = sa.and_(*conditions)
 
-    total = await session.scalar(
-        sa.select(sa.func.count()).select_from(Earthquake).where(where)
-    )
+    total = await session.scalar(sa.select(sa.func.count()).select_from(Earthquake).where(where))
     stmt = (
         sa.select(Earthquake)
         .where(where)
@@ -136,9 +124,7 @@ async def get_recent(
         .limit(limit)
         .offset(offset)
     )
-    items = [
-        EarthquakeRead.model_validate(row) for row in (await session.scalars(stmt)).all()
-    ]
+    items = [EarthquakeRead.model_validate(row) for row in (await session.scalars(stmt)).all()]
     return items, total or 0
 
 
@@ -160,9 +146,7 @@ async def get_stats(session: AsyncSession, hours: int = 24) -> dict:
     since = datetime.now(UTC) - timedelta(hours=hours)
     base = Earthquake.event_time >= since
 
-    total = await session.scalar(
-        sa.select(sa.func.count()).select_from(Earthquake).where(base)
-    )
+    total = await session.scalar(sa.select(sa.func.count()).select_from(Earthquake).where(base))
 
     strongest = (
         await session.scalars(
@@ -175,16 +159,11 @@ async def get_stats(session: AsyncSession, hours: int = 24) -> dict:
 
     recent = (
         await session.scalars(
-            sa.select(Earthquake)
-            .where(base)
-            .order_by(Earthquake.event_time.desc())
-            .limit(1)
+            sa.select(Earthquake).where(base).order_by(Earthquake.event_time.desc()).limit(1)
         )
     ).first()
 
-    avg_depth = await session.scalar(
-        sa.select(sa.func.avg(Earthquake.depth_km)).where(base)
-    )
+    avg_depth = await session.scalar(sa.select(sa.func.avg(Earthquake.depth_km)).where(base))
 
     distribution: dict[str, int] = {}
     for name, lo, hi in _MAGNITUDE_BANDS:
@@ -194,9 +173,7 @@ async def get_stats(session: AsyncSession, hours: int = 24) -> dict:
         if hi is not None:
             conditions.append(Earthquake.magnitude < hi)
         count = await session.scalar(
-            sa.select(sa.func.count())
-            .select_from(Earthquake)
-            .where(sa.and_(*conditions))
+            sa.select(sa.func.count()).select_from(Earthquake).where(sa.and_(*conditions))
         )
         distribution[name] = count or 0
 
@@ -204,14 +181,10 @@ async def get_stats(session: AsyncSession, hours: int = 24) -> dict:
         "hours": hours,
         "total": total or 0,
         "max_magnitude": (
-            EarthquakeRead.model_validate(strongest).model_dump(mode="json")
-            if strongest
-            else None
+            EarthquakeRead.model_validate(strongest).model_dump(mode="json") if strongest else None
         ),
         "recent": (
-            EarthquakeRead.model_validate(recent).model_dump(mode="json")
-            if recent
-            else None
+            EarthquakeRead.model_validate(recent).model_dump(mode="json") if recent else None
         ),
         "avg_depth_km": round(avg_depth, 1) if avg_depth is not None else None,
         "distribution": distribution,

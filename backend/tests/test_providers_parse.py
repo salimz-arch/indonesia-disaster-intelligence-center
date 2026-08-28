@@ -1,4 +1,5 @@
 """Unit test parser provider — tanpa network, fixture inline."""
+
 from datetime import UTC, datetime, timedelta
 
 from app.providers.bmkg import parse_gempa
@@ -101,10 +102,7 @@ def test_wmo_condition_mapping():
 def test_rainfall_from_hourly_windows():
     """26 jam data, 1mm/jam → window 1j=1, 6j=6, 24j=24."""
     now = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
-    times = [
-        (now - timedelta(hours=25 - i)).strftime("%Y-%m-%dT%H:%M")
-        for i in range(26)
-    ]
+    times = [(now - timedelta(hours=25 - i)).strftime("%Y-%m-%dT%H:%M") for i in range(26)]
     values = [1.0] * 26
     result = rainfall_from_hourly(
         {"time": times, "precipitation": values}, now + timedelta(minutes=30)

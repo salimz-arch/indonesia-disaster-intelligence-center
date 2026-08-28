@@ -6,6 +6,7 @@ membacanya (bukan "CORS Missing Allow Origin" palsu).
 
 Pure-ASGI (bukan BaseHTTPMiddleware) agar aman untuk streaming SSE (Step 12).
 """
+
 import logging
 from datetime import UTC, datetime
 
@@ -28,9 +29,7 @@ class ErrorHandlingMiddleware:
         try:
             await self.app(scope, receive, send)
         except Exception:
-            logger.exception(
-                "unhandled error: %s %s", scope.get("method"), scope.get("path")
-            )
+            logger.exception("unhandled error: %s %s", scope.get("method"), scope.get("path"))
             response = JSONResponse(
                 status_code=503,
                 content={

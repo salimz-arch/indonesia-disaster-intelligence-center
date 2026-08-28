@@ -1,4 +1,5 @@
 """Envelope response konsisten untuk seluruh API (kontrak §35)."""
+
 from datetime import UTC, datetime
 from typing import Any
 

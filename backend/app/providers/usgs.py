@@ -3,6 +3,7 @@
 Menyediakan kepadatan event (M2.5+) yang tidak dicover feed realtime BMKG,
 termasuk backfill historis untuk modul analytics.
 """
+
 import logging
 from datetime import UTC, datetime, timedelta
 
@@ -35,9 +36,7 @@ def parse_feature(feature: dict) -> EarthquakeCreate | None:
         lon, lat, depth = feature["geometry"]["coordinates"]
         return EarthquakeCreate(
             provider="usgs",
-            source_id=str(
-                feature.get("id") or f"usgs-{props.get('time', 'unknown')}"
-            ),
+            source_id=str(feature.get("id") or f"usgs-{props.get('time', 'unknown')}"),
             magnitude=float(magnitude),
             depth_km=float(depth),
             latitude=float(lat),
@@ -54,9 +53,7 @@ def parse_feature(feature: dict) -> EarthquakeCreate | None:
 class USGSEarthquakeProvider(EarthquakeProvider):
     name = "usgs-earthquake"
 
-    async def fetch_window(
-        self, start: datetime, end: datetime
-    ) -> list[EarthquakeCreate]:
+    async def fetch_window(self, start: datetime, end: datetime) -> list[EarthquakeCreate]:
         params = {
             "format": "geojson",
             "starttime": start.strftime("%Y-%m-%dT%H:%M:%S"),

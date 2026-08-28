@@ -1,4 +1,5 @@
 """Integration test: analytics aggregation (WIB bucketing, band counts)."""
+
 from datetime import UTC, datetime, timedelta
 
 from app.models import Location, RainfallObservation

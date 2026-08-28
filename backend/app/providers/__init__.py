@@ -1,4 +1,5 @@
 """Provider factories — satu-satunya tempat memilih provider live vs mock."""
+
 from app.core.config import get_settings
 from app.providers.base import EarthquakeProvider, WeatherProvider
 from app.providers.bmkg import BMKGEarthquakeProvider

@@ -1,4 +1,5 @@
 """DTO batch observasi per lokasi — jembatan provider → service."""
+
 from dataclasses import dataclass
 
 from app.schemas.rainfall import RainfallObservationCreate

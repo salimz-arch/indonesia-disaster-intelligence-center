@@ -3,6 +3,7 @@ import type {
   RainfallIntensity,
   Severity,
 } from "@/types/api";
+import type { AlertSeverity } from "@/types/api";
 
 /** Warna hex — dipakai badge, map marker (Step 8), dan ECharts (Step 14). */
 export const SEVERITY_COLOR: Record<Severity, string> = {
@@ -54,3 +55,19 @@ export const INTENSITY_LABEL: Record<RainfallIntensity, string> = {
   very_heavy: "VERY HEAVY",
   extreme: "EXTREME",
 };
+
+export const ALERT_SEVERITY_COLOR: Record<AlertSeverity, string> = {
+  normal: "#22C55E",
+  watch: "#F59E0B",
+  warning: "#F97316",
+  critical: "#EF4444",
+};
+export const ALERT_SEVERITY_LABEL: Record<AlertSeverity, string> = {
+  normal: "NORMAL",
+  watch: "WATCH",
+  warning: "WARNING",
+  critical: "CRITICAL",
+};
+export function isAlertActive(a: { expires_at: string | null }): boolean {
+  return a.expires_at === null || new Date(a.expires_at).getTime() > Date.now();
+}

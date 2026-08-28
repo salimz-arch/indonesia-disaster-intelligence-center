@@ -3,6 +3,7 @@
 Mengimpor MODULE app.db.redis (bukan simbolnya) agar assignment
 redis_client oleh init_redis() terlihat di sini.
 """
+
 import json
 import logging
 from typing import Any
@@ -45,5 +46,3 @@ async def cache_delete_pattern(pattern: str) -> None:
             await client.delete(*keys)
     except Exception:
         logger.warning("cache_delete_pattern gagal utk %s — dilewati", pattern)
-
-

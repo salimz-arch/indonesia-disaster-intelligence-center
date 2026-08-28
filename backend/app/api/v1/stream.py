@@ -4,6 +4,7 @@ Format: event: <nama>\\ndata: <json>\\n\\n
 Events: hello, heartbeat (tiap 25s), earthquake.new, weather.update, source.status.
 Klien disconnect → generator dibatalkan → unsubscribe (cleanup di finally).
 """
+
 import asyncio
 import json
 import logging
@@ -40,17 +41,13 @@ async def stream() -> StreamingResponse:
             while True:
                 try:
                     # Poll queue dengan timeout → heartbeat saat idle
-                    item = await asyncio.wait_for(
-                        queue.get(), timeout=HEARTBEAT_SECONDS
-                    )
+                    item = await asyncio.wait_for(queue.get(), timeout=HEARTBEAT_SECONDS)
                     yield item
                 except TimeoutError:
                     yield _sse("heartbeat", {"ts": datetime.now(UTC).isoformat()})
         finally:
             bus.unsubscribe(sub_id)
-            logger.info(
-                "sse client disconnected (total: %d)", bus.subscriber_count()
-            )
+            logger.info("sse client disconnected (total: %d)", bus.subscriber_count())
 
     return StreamingResponse(
         event_generator(),

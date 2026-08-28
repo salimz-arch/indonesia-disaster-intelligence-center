@@ -1,4 +1,5 @@
 """Rainfall endpoints — observasi curah hujan per lokasi + history."""
+
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,9 +41,7 @@ async def current_rainfall(
     if item is None:
         return JSONResponse(
             status_code=404,
-            content=fail(
-                "NOT_FOUND", f"Belum ada observasi untuk location_id={location_id}"
-            ),
+            content=fail("NOT_FOUND", f"Belum ada observasi untuk location_id={location_id}"),
         )
     return ok(item.model_dump(mode="json"), source="open-meteo")
 

@@ -4,6 +4,7 @@ System prompt MENGIKATI aturan §18: hanya data yang diberikan, tanpa klaim
 prediksi gempa, tanpa instruksi keselamatan resmi.
 Few-shot example + JSON mode → output konsisten.
 """
+
 import json
 import logging
 from typing import ClassVar
@@ -46,7 +47,7 @@ SYSTEM_PROMPT = (
     "EXAMPLE RESPONSE (for reference only — do NOT copy these values):\n"
     "{\n"
     '  "current_situation": "Aktivitas seismik 24 jam terakhir tercatat 15 '
-    'event dengan magnitudo terbesar M5.2. Hujan aktif di 3 dari 16 lokasi '
+    "event dengan magnitudo terbesar M5.2. Hujan aktif di 3 dari 16 lokasi "
     'pantau dengan intensitas puncak 12.5 mm/jam.",\n'
     '  "main_factors": ["Gempa terbesar M5.2 dalam 24 jam", '
     '"3 gempa signifikan (M≥4.5) dalam 24 jam", '
@@ -68,7 +69,9 @@ class GeminiAIProvider(AIProvider):
         self.model = model
 
     def _build_url(self) -> str:
-        return f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        return (
+            f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        )
 
     def _parse_response(self, data: dict) -> AISituationOutput:
         """Extract + parse JSON dari respons Gemini."""
@@ -121,8 +124,7 @@ class GeminiAIProvider(AIProvider):
                 # 429 = rate limit, 400 = bad request — tidak retry
                 if exc.response.status_code in (400, 401, 403):
                     raise AIProviderError(
-                        f"Gemini API error {exc.response.status_code}: "
-                        f"{exc.response.text[:200]}"
+                        f"Gemini API error {exc.response.status_code}: {exc.response.text[:200]}"
                     ) from exc
                 logger.warning(
                     "gemini attempt %d gagal (HTTP %d) — %s",
@@ -131,13 +133,9 @@ class GeminiAIProvider(AIProvider):
                     str(exc)[:200],
                 )
             except httpx.HTTPError as exc:
-                logger.warning(
-                    "gemini attempt %d gagal: %s", attempt + 1, exc.__class__.__name__
-                )
+                logger.warning("gemini attempt %d gagal: %s", attempt + 1, exc.__class__.__name__)
             except (KeyError, IndexError, json.JSONDecodeError) as exc:
-                logger.warning(
-                    "gemini attempt %d parse gagal: %s", attempt + 1, exc
-                )
+                logger.warning("gemini attempt %d parse gagal: %s", attempt + 1, exc)
                 if attempt == 0:
                     # Tambah instruksi lebih tegas untuk retry
                     payload["contents"][0]["parts"][0]["text"] += (
@@ -146,6 +144,4 @@ class GeminiAIProvider(AIProvider):
                     )
                     continue
 
-        raise AIProviderError(
-            "Gemini gagal menghasilkan JSON valid setelah 2 percobaan"
-        )
+        raise AIProviderError("Gemini gagal menghasilkan JSON valid setelah 2 percobaan")

@@ -1,4 +1,5 @@
 """Weather service — ingest observasi + query terbaru per lokasi."""
+
 import logging
 from collections.abc import Sequence
 
@@ -43,9 +44,7 @@ async def get_latest_for_location(
 
 async def get_latest_all(session: AsyncSession) -> list[WeatherObservationRead]:
     """Observasi terbaru untuk tiap lokasi primer."""
-    loc_ids = list(
-        (await session.scalars(sa.select(Location.id).where(Location.is_primary))).all()
-    )
+    loc_ids = list((await session.scalars(sa.select(Location.id).where(Location.is_primary))).all())
     results = []
     for loc_id in loc_ids:
         item = await get_latest_for_location(session, loc_id)

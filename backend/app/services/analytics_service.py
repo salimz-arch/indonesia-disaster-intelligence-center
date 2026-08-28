@@ -1,4 +1,5 @@
 """Analytics service — agregasi historis untuk /analytics (§20)."""
+
 import logging
 from datetime import UTC, datetime, timedelta
 
@@ -36,9 +37,7 @@ def _wib_hour(column):
     return sa.extract("hour", column + text("interval '7 hours'"))
 
 
-async def _band_count(
-    session: AsyncSession, base, column, bands
-) -> dict[str, int]:
+async def _band_count(session: AsyncSession, base, column, bands) -> dict[str, int]:
     out: dict[str, int] = {}
     for name, lo, hi in bands:
         conds = [base]
@@ -47,9 +46,7 @@ async def _band_count(
         if hi is not None:
             conds.append(column < hi)
         cnt = await session.scalar(
-            sa.select(sa.func.count())
-            .select_from(Earthquake)
-            .where(sa.and_(*conds))
+            sa.select(sa.func.count()).select_from(Earthquake).where(sa.and_(*conds))
         )
         out[name] = cnt or 0
     return out
@@ -82,12 +79,8 @@ async def earthquake_analytics(session: AsyncSession, days: int) -> dict:
         for r in timeline_rows
     ]
 
-    distribution = await _band_count(
-        session, base, Earthquake.magnitude, MAGNITUDE_BANDS
-    )
-    depth_distribution = await _band_count(
-        session, base, Earthquake.depth_km, DEPTH_BANDS
-    )
+    distribution = await _band_count(session, base, Earthquake.magnitude, MAGNITUDE_BANDS)
+    depth_distribution = await _band_count(session, base, Earthquake.depth_km, DEPTH_BANDS)
 
     hour_rows = (
         await session.execute(

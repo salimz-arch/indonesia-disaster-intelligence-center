@@ -3,6 +3,7 @@
 PENTING: env vars di-set SEBELUM import modul app apa pun.
 Test tidak pernah menjalankan scheduler & tidak pernah memukul API eksternal.
 """
+
 import asyncio
 import os
 import sys
@@ -52,9 +53,7 @@ def test_db():
     async def _setup() -> None:
         admin = create_async_engine(PG_ADMIN_URL, isolation_level="AUTOCOMMIT")
         async with admin.connect() as conn:
-            await conn.execute(
-                sa.text(f"DROP DATABASE IF EXISTS {TEST_DB_NAME} WITH (FORCE)")
-            )
+            await conn.execute(sa.text(f"DROP DATABASE IF EXISTS {TEST_DB_NAME} WITH (FORCE)"))
             await conn.execute(sa.text(f"CREATE DATABASE {TEST_DB_NAME}"))
         await admin.dispose()
 
@@ -66,9 +65,7 @@ def test_db():
     async def _teardown() -> None:
         admin = create_async_engine(PG_ADMIN_URL, isolation_level="AUTOCOMMIT")
         async with admin.connect() as conn:
-            await conn.execute(
-                sa.text(f"DROP DATABASE IF EXISTS {TEST_DB_NAME} WITH (FORCE)")
-            )
+            await conn.execute(sa.text(f"DROP DATABASE IF EXISTS {TEST_DB_NAME} WITH (FORCE)"))
         await admin.dispose()
 
     asyncio.run(_setup())
@@ -86,7 +83,5 @@ async def db_session(test_db):
 
     async with engine.begin() as conn:
         for table in reversed(Base.metadata.sorted_tables):
-            await conn.execute(
-                sa.text(f'TRUNCATE TABLE "{table.name}" RESTART IDENTITY CASCADE')
-            )
+            await conn.execute(sa.text(f'TRUNCATE TABLE "{table.name}" RESTART IDENTITY CASCADE'))
     await engine.dispose()

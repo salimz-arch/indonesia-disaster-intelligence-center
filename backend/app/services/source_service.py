@@ -1,4 +1,5 @@
 """Source service — status kesehatan tiap data source (halaman transparency §40)."""
+
 from datetime import UTC, datetime
 
 import sqlalchemy as sa
@@ -24,7 +25,6 @@ async def mark_success(session: AsyncSession, name: str, latency_ms: int) -> Non
     bus.publish("source.status", {"name": name, "status": "online", "latency_ms": latency_ms})
 
 
-
 async def mark_failure(session: AsyncSession, name: str, error: str) -> None:
     await session.execute(
         sa.update(DataSource)
@@ -37,8 +37,6 @@ async def mark_failure(session: AsyncSession, name: str, error: str) -> None:
 
 async def list_sources(session: AsyncSession) -> list[DataSourceRead]:
     rows = (
-        await session.scalars(
-            sa.select(DataSource).order_by(DataSource.category, DataSource.name)
-        )
+        await session.scalars(sa.select(DataSource).order_by(DataSource.category, DataSource.name))
     ).all()
     return [DataSourceRead.model_validate(row) for row in rows]

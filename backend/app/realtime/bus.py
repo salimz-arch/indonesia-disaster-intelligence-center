@@ -4,6 +4,7 @@ publish() non-blocking: subscriber lambat (queue penuh) → event di-drop.
 Realtime bersifat ephemeral — frontend resync semua query saat reconnect,
 jadi event yang terlewap tergantikan oleh refetch, bukan hilang.
 """
+
 import asyncio
 import json
 import logging
@@ -43,9 +44,7 @@ class EventBus:
             except asyncio.QueueFull:
                 dropped += 1
         if dropped:
-            logger.warning(
-                "realtime: %d subscriber penuh — event '%s' di-drop", dropped, event
-            )
+            logger.warning("realtime: %d subscriber penuh — event '%s' di-drop", dropped, event)
 
 
 bus = EventBus()

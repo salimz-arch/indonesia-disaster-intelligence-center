@@ -3,6 +3,7 @@
 Satu request untuk semua lokasi. timezone=UTC → semua timestamp sudah UTC
 (konsisten dengan kebijakan database).
 """
+
 import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime
@@ -101,9 +102,7 @@ def _opt_float(value: object) -> float | None:
     return float(value) if value is not None else None
 
 
-def parse_location_payload(
-    payload: dict, location_id: int
-) -> LocationObservation | None:
+def parse_location_payload(payload: dict, location_id: int) -> LocationObservation | None:
     try:
         current = payload["current"]
         observed = datetime.fromisoformat(current["time"]).replace(tzinfo=UTC)
@@ -136,9 +135,7 @@ def parse_location_payload(
                 observed_at=observed,
                 source="open-meteo",
             )
-        return LocationObservation(
-            location_id=location_id, weather=weather, rainfall=rainfall
-        )
+        return LocationObservation(location_id=location_id, weather=weather, rainfall=rainfall)
     except (KeyError, ValueError, TypeError, ValidationError) as exc:
         logger.warning("Open-Meteo payload invalid (location %s): %s", location_id, exc)
         return None
@@ -150,9 +147,7 @@ class OpenMeteoProvider(WeatherProvider):
 
     URL = "https://api.open-meteo.com/v1/forecast"
 
-    async def fetch_batch(
-        self, locations: Sequence[LocationRef]
-    ) -> list[LocationObservation]:
+    async def fetch_batch(self, locations: Sequence[LocationRef]) -> list[LocationObservation]:
         if not locations:
             return []
         params = {

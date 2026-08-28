@@ -1,4 +1,5 @@
 """Canonical AI report schema (Section 18-19)."""
+
 from datetime import datetime
 from enum import StrEnum
 

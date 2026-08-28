@@ -1,4 +1,5 @@
 """Rainfall service — query observasi hujan terbaru + history per lokasi."""
+
 from datetime import UTC, datetime, timedelta
 
 import sqlalchemy as sa
@@ -22,9 +23,7 @@ async def get_latest_for_location(
 
 
 async def get_latest_all(session: AsyncSession) -> list[RainfallObservationRead]:
-    loc_ids = list(
-        (await session.scalars(sa.select(Location.id).where(Location.is_primary))).all()
-    )
+    loc_ids = list((await session.scalars(sa.select(Location.id).where(Location.is_primary))).all())
     results = []
     for loc_id in loc_ids:
         item = await get_latest_for_location(session, loc_id)

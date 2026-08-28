@@ -1,4 +1,5 @@
 """Unit test Risk Engine — deterministik & reproducible (§19)."""
+
 from datetime import UTC, datetime, timedelta
 
 from app.ai.risk_engine import compute_risk
@@ -70,9 +71,7 @@ def test_major_earthquake_high():
 
 
 def test_extreme_rain_and_storm():
-    result = compute_risk(
-        [], [_wx("thunderstorm")], [_rain(25.0)]
-    )
+    result = compute_risk([], [_wx("thunderstorm")], [_rain(25.0)])
     assert result.score >= 45
     assert result.level == "moderate"
 

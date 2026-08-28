@@ -1,4 +1,5 @@
 """Integration test: AI analyze pipeline (mock provider)."""
+
 from app.services.ai_service import run_analysis
 
 

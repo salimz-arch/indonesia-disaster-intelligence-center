@@ -3,6 +3,7 @@
 Semua error tampil langsung di console, terpisah dari scheduler.
 Jalankan dari backend/ (venv aktif):  python scripts/ingest_once.py
 """
+
 import asyncio
 import sys
 from datetime import UTC, datetime, timedelta
@@ -32,11 +33,11 @@ async def _try(session, label, source_names, fn):
     try:
         outcome = await fn(session)
         ms = int((perf_counter() - t0) * 1000)
-        for name in ([source_names] if isinstance(source_names, str) else source_names):
+        for name in [source_names] if isinstance(source_names, str) else source_names:
             await mark_success(session, name, ms)
         print(f"  SUKSES ({ms}ms): {outcome}")
     except Exception as exc:
-        for name in ([source_names] if isinstance(source_names, str) else source_names):
+        for name in [source_names] if isinstance(source_names, str) else source_names:
             await mark_failure(session, name, f"{exc.__class__.__name__}: {exc}")
         print(f"  GAGAL: {exc.__class__.__name__}: {exc}")
 
@@ -50,8 +51,10 @@ async def main() -> None:
         async def bmkg_job(s):
             events = await get_bmkg_provider().fetch()
             r = await ingest_earthquakes(s, events)
-            return (f"fetch={len(events)} → inserted={r.inserted}, "
-                    f"dup={r.duplicate}, similar={r.similar}")
+            return (
+                f"fetch={len(events)} → inserted={r.inserted}, "
+                f"dup={r.duplicate}, similar={r.similar}"
+            )
 
         async def usgs_job(s):
             provider = get_usgs_provider()
@@ -62,13 +65,13 @@ async def main() -> None:
                 end - timedelta(days=settings.usgs_backfill_days), end
             )
             r = await ingest_earthquakes(s, events)
-            return (f"backfill {settings.usgs_backfill_days}d: fetch={len(events)} → "
-                    f"inserted={r.inserted}, dup={r.duplicate}, similar={r.similar}")
+            return (
+                f"backfill {settings.usgs_backfill_days}d: fetch={len(events)} → "
+                f"inserted={r.inserted}, dup={r.duplicate}, similar={r.similar}"
+            )
 
         async def weather_job(s):
-            locations = (
-                await s.scalars(sa.select(Location).where(Location.is_primary))
-            ).all()
+            locations = (await s.scalars(sa.select(Location).where(Location.is_primary))).all()
             batches = await get_weather_provider().fetch_batch(locations)
             w, r = await ingest_observations(s, batches)
             return f"{len(locations)} lokasi → weather={w}, rainfall={r}"

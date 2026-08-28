@@ -1,4 +1,5 @@
 """OpenAI provider — aktif saat AI_PROVIDER=openai + OPENAI_API_KEY terisi."""
+
 import json
 import logging
 from typing import ClassVar

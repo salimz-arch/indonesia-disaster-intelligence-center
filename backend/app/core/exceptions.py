@@ -1,4 +1,5 @@
 """Exception aplikasi — dipetakan ke envelope error di layer API."""
+
 from typing import ClassVar
 
 

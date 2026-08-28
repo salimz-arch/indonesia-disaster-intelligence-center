@@ -1,4 +1,5 @@
 """Application settings — dimuat dari environment / file .env."""
+
 from functools import lru_cache
 from typing import Literal
 

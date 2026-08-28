@@ -1,4 +1,5 @@
 """AI endpoints — situation analysis (§18). Provider via AI_PROVIDER env."""
+
 import logging
 
 from fastapi import APIRouter, Depends, Query

@@ -1,4 +1,5 @@
 """Integration test: rainfall history — ordering, filtering, window."""
+
 from datetime import UTC, datetime, timedelta
 
 from app.models import Location, RainfallObservation

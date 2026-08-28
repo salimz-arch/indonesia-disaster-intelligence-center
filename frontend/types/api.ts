@@ -232,3 +232,20 @@ export interface WeatherAnalytics {
   }[];
   condition_counts: Partial<Record<WeatherCondition, number>>;
 }
+export type AlertSeverity = "normal" | "watch" | "warning" | "critical";
+
+export interface AlertItem {
+  id: number;
+  event_type: string;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  latitude: number | null;
+  longitude: number | null;
+  location_text: string | null;
+  triggered_at: string;
+  expires_at: string | null;
+  source: string;
+  source_id?: string | null;
+  is_active?: boolean;
+}

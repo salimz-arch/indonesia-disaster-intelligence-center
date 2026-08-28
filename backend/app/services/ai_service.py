@@ -1,4 +1,5 @@
 """AI service — orchestrator §1.9: context → risk engine → provider → validator."""
+
 import logging
 from datetime import UTC, datetime, timedelta
 
@@ -40,15 +41,10 @@ async def _build_context(
         .where(Earthquake.event_time >= since)
         .order_by(Earthquake.event_time.desc())
     )
-    quakes = [
-        EarthquakeRead.model_validate(r)
-        for r in (await session.scalars(quake_stmt)).all()
-    ]
+    quakes = [EarthquakeRead.model_validate(r) for r in (await session.scalars(quake_stmt)).all()]
 
     loc_stmt = sa.select(Location).where(Location.is_primary)
-    loc_names = {
-        loc.id: loc.name for loc in (await session.scalars(loc_stmt)).all()
-    }
+    loc_names = {loc.id: loc.name for loc in (await session.scalars(loc_stmt)).all()}
 
     weather, rainfall = [], []
     for loc_id in loc_names:
@@ -81,9 +77,7 @@ async def _build_context(
         "earthquakes": {
             "total_24h": len(quakes),
             "max_magnitude": max_mag,
-            "recent_significant": [
-                e.model_dump(mode="json") for e in significant[:5]
-            ],
+            "recent_significant": [e.model_dump(mode="json") for e in significant[:5]],
         },
         "weather": {
             "total_locations": len(weather),
@@ -95,17 +89,11 @@ async def _build_context(
         },
         "rainfall": {
             "total_locations": len(rainfall),
-            "raining_locations": sum(
-                1 for r in rainfall if r.rainfall_1h_mm > 0
-            ),
-            "peak_1h_mm": max(
-                (r.rainfall_1h_mm for r in rainfall), default=None
-            ),
+            "raining_locations": sum(1 for r in rainfall if r.rainfall_1h_mm > 0),
+            "peak_1h_mm": max((r.rainfall_1h_mm for r in rainfall), default=None),
             "top_rain_locations": [
                 loc_names.get(r.location_id, str(r.location_id))
-                for r in sorted(
-                    rainfall, key=lambda x: x.rainfall_1h_mm, reverse=True
-                )[:3]
+                for r in sorted(rainfall, key=lambda x: x.rainfall_1h_mm, reverse=True)[:3]
                 if r.rainfall_1h_mm > 0
             ],
         },

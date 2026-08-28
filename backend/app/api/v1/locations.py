@@ -1,4 +1,5 @@
 """Locations endpoints — untuk search & flyTo frontend (§22)."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 

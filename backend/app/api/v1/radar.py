@@ -3,6 +3,7 @@
 Frontend memakai frames ini untuk animasi pergerakan hujan (§11).
 Tile PNG dimuat langsung oleh MapLibre dari host RainViewer.
 """
+
 import logging
 from time import perf_counter
 
@@ -51,9 +52,7 @@ async def radar_frames() -> dict | JSONResponse:
         await _mark(ok_status=False, error=exc.message)
         return JSONResponse(
             status_code=503,
-            content=fail(
-                "DATA_SOURCE_UNAVAILABLE", f"Radar provider gagal: {exc.message}"
-            ),
+            content=fail("DATA_SOURCE_UNAVAILABLE", f"Radar provider gagal: {exc.message}"),
         )
     await cache_set_json(RADAR_CACHE_KEY, payload, RADAR_CACHE_TTL)
     await _mark(ok_status=True, latency_ms=int((perf_counter() - t0) * 1000))
