@@ -19,6 +19,8 @@ export function ErrorState({
       <AlertTriangle className="text-idic-red" size={28} aria-hidden />
       <div className="text-sm font-semibold tracking-wide">{title}</div>
       {message && <p className="max-w-sm text-sm text-slate-400">{message}</p>}
+
+      {/* KUNCI: Hanya render jika onRetry ada */}
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
           Retry
