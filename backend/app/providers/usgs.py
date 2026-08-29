@@ -34,6 +34,10 @@ def parse_feature(feature: dict) -> EarthquakeCreate | None:
             return None
         # GeoJSON: [longitude, latitude, depth_km] — urutan SENGAJA dibalik
         lon, lat, depth = feature["geometry"]["coordinates"]
+
+        place = props.get("place") or ""
+        region = place.split(",")[-1].strip() if "," in place else (place or None)
+
         return EarthquakeCreate(
             provider="usgs",
             source_id=str(feature.get("id") or f"usgs-{props.get('time', 'unknown')}"),
@@ -41,7 +45,8 @@ def parse_feature(feature: dict) -> EarthquakeCreate | None:
             depth_km=float(depth),
             latitude=float(lat),
             longitude=float(lon),
-            location_text=props.get("place"),
+            location_text=place or None,
+            region=region,
             event_time=datetime.fromtimestamp(props["time"] / 1000, tz=UTC),
             potential_tsunami=bool(props.get("tsunami")),
         )

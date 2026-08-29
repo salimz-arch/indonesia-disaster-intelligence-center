@@ -2,7 +2,6 @@
 
 import { Activity, ArrowDownToLine, TrendingUp, Zap } from "lucide-react";
 
-import { CardSkeleton } from "@/components/common/states";
 import { KpiCard } from "@/components/kpi/kpi-card";
 import { useEarthquakeStats } from "@/hooks/use-earthquakes";
 import { CATEGORY_COLOR, CATEGORY_LABEL } from "@/lib/severity";
@@ -38,13 +37,21 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        {/* 1. Total gempa */}
         <KpiCard
           icon={Activity}
           label={`Gempa ${hourLabel}`}
           value={s?.total ?? null}
           loading={stats.isLoading}
           error={stats.isError ? "gagal memuat" : null}
+          footer={
+            <span className="text-[11px] text-slate-400">
+              Seluruh magnitudo, Indonesia
+            </span>
+          }
         />
+
+        {/* 2. M5+ */}
         <KpiCard
           icon={Zap}
           label="M5+"
@@ -52,11 +59,13 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
           accent="#F59E0B"
           loading={stats.isLoading}
           footer={
-            <span className="text-[11px] text-slate-500">
-              Signifikan ke atas
+            <span className="text-[11px] text-slate-400">
+              Berpotensi terasa / signifikan
             </span>
           }
         />
+
+        {/* 3. Terbesar */}
         <KpiCard
           icon={TrendingUp}
           label="Terbesar"
@@ -66,16 +75,28 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
               ? CATEGORY_COLOR[s.max_magnitude.category]
               : undefined
           }
-          format={(v) => v.toFixed(1)}
+          format={(v) => `M ${v.toFixed(1)}`}
           loading={stats.isLoading}
           footer={
-            s?.max_magnitude?.location_text && (
-              <span className="line-clamp-1 text-[11px] text-slate-500">
-                {s.max_magnitude.location_text}
+            s?.max_magnitude ? (
+              <span className="flex flex-col gap-0.5">
+                <span className="line-clamp-1 text-[11px] text-slate-400">
+                  {s.max_magnitude.location_text ?? "—"}
+                </span>
+                <span
+                  className="text-[10px] font-bold"
+                  style={{
+                    color: CATEGORY_COLOR[s.max_magnitude.category],
+                  }}
+                >
+                  Kategori: {CATEGORY_LABEL[s.max_magnitude.category]}
+                </span>
               </span>
-            )
+            ) : undefined
           }
         />
+
+        {/* 4. Kedalaman rata-rata */}
         <KpiCard
           icon={ArrowDownToLine}
           label="Kedalaman"
@@ -83,11 +104,26 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
           unit="km"
           format={(v) => v.toFixed(0)}
           loading={stats.isLoading}
-          footer={<span className="text-[11px] text-slate-500">rata-rata</span>}
+          footer={
+            <span className="flex flex-col gap-0.5">
+              <span className="text-[11px] text-slate-400">
+                Rata-rata hiposenter
+              </span>
+              <span className="text-[10px] font-medium text-slate-400">
+                {s?.avg_depth_km !== null && s?.avg_depth_km !== undefined
+                  ? s.avg_depth_km < 70
+                    ? "Dangkal (<70 km)"
+                    : s.avg_depth_km < 300
+                      ? "Menengah (70–300 km)"
+                      : "Dalam (>300 km)"
+                  : ""}
+              </span>
+            </span>
+          }
         />
       </div>
 
-      {/* Distribusi magnitude — CSS bars (ECharts masuk Step 14) */}
+      {/* Distribusi magnitude */}
       <section className="rounded-2xl border border-idic-border bg-idic-card p-5">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
           Magnitude Distribution
@@ -95,7 +131,10 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
         {stats.isLoading ? (
           <div className="mt-4 space-y-2">
             {ORDER.map((k) => (
-              <CardSkeleton key={k} />
+              <div
+                key={k}
+                className="h-8 animate-pulse rounded-lg bg-idic-border/40"
+              />
             ))}
           </div>
         ) : (
@@ -108,7 +147,7 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
               );
               return (
                 <div key={k} className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-[11px] text-slate-500">
+                  <span className="w-24 shrink-0 text-[11px] text-slate-400">
                     {CATEGORY_LABEL[k]}
                   </span>
                   <div className="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-idic-bg-2">
@@ -128,7 +167,7 @@ export function EarthquakeKpis({ hours }: { hours: number }) {
             })}
           </div>
         )}
-        <p className="mt-3 text-[10px] text-slate-600">
+        <p className="mt-3 text-[10px] text-slate-400">
           Kategori magnitude = klasifikasi visual internal aplikasi, bukan
           klasifikasi resmi lembaga seismik.
         </p>

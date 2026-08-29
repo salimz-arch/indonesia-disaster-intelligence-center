@@ -8,6 +8,23 @@ import { CATEGORY_COLOR, CATEGORY_LABEL } from "@/lib/severity";
 import { formatDateTime, timeAgo } from "@/lib/format";
 import type { Earthquake } from "@/types/api";
 
+/** Region tampilan: pakai kolom region bila ada; kalau null derive dari
+ *  location_text — USGS: "...of Place, Negara" · BMKG: "...-PROVINSI". */
+function deriveRegion(region: string | null, loc: string | null): string {
+  if (region) return region;
+  if (!loc) return "—";
+  const byComma = loc
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (byComma.length > 1) return byComma[byComma.length - 1];
+  const byDash = loc
+    .split("-")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return byDash[byDash.length - 1] || "—";
+}
+
 export function EarthquakeDetail({
   event,
   onClose,
@@ -97,7 +114,10 @@ export function EarthquakeDetail({
               value={`${event.latitude.toFixed(2)}, ${event.longitude.toFixed(2)}`}
             />
             <Info label="Provider" value={event.provider} />
-            <Info label="Wilayah" value={event.region ?? "—"} />
+            <Info
+              label="Wilayah"
+              value={deriveRegion(event.region, event.location_text)}
+            />
           </dl>
 
           <div className="mt-4 rounded-xl border border-idic-border/60 bg-idic-bg-2/50 p-3">

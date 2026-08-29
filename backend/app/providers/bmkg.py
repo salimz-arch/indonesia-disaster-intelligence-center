@@ -28,6 +28,10 @@ def parse_gempa(raw: dict) -> EarthquakeCreate | None:
         magnitude_raw = raw.get("Magnitude") or raw.get("Magnitudo")
         if magnitude_raw is None:
             return None
+
+        wilayah = raw.get("Wilayah") or ""
+        region = wilayah.split("-")[-1].strip() if "-" in wilayah else (wilayah or None)
+
         return EarthquakeCreate(
             provider="bmkg",
             # BMKG tak punya ID stabil → composite deterministik (dedup tetap jalan)
@@ -36,7 +40,8 @@ def parse_gempa(raw: dict) -> EarthquakeCreate | None:
             depth_km=float(str(raw["Kedalaman"]).split()[0]),
             latitude=float(lat_str),
             longitude=float(lon_str),
-            location_text=raw.get("Wilayah"),
+            location_text=wilayah or None,
+            region=region,
             event_time=datetime.fromisoformat(raw["DateTime"]),
             # "tidak berpotensi TSUNAMI" MENGANDUNG kata "berpotensi" — cek prefix!
             potential_tsunami=("tsunami" in potensi) and (not potensi.startswith("tidak")),
