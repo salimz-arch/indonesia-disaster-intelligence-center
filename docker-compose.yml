@@ -1,6 +1,4 @@
-# ═══ IDIC — infrastruktur development lokal ═══
-# Hanya database & cache. Backend/frontend di-container-kan pada Step 17.
-
+# ═══ IDIC — Full Stack: postgres + redis + backend + frontend ═══
 services:
   postgres:
     image: postgres:16-alpine
@@ -15,7 +13,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-idic} -d ${POSTGRES_DB:-idic}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-idic} -d ${POSTGRES_DB:-idic}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -33,6 +35,56 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  backend:
+    build: ./backend
+    container_name: idic-backend
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-idic}:${POSTGRES_PASSWORD:-idic}@postgres:5432/${POSTGRES_DB:-idic}
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      DATA_MODE: ${DATA_MODE:-live}
+      SCHEDULER_ENABLED: "true"
+      EARTHQUAKE_REFRESH_SECONDS: ${EARTHQUAKE_REFRESH_SECONDS:-60}
+      USGS_REFRESH_SECONDS: ${USGS_REFRESH_SECONDS:-300}
+      WEATHER_REFRESH_SECONDS: ${WEATHER_REFRESH_SECONDS:-600}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    container_name: idic-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:
