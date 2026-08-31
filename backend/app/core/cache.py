@@ -35,14 +35,19 @@ async def cache_set_json(key: str, value: Any, ttl_seconds: int) -> None:
         logger.warning("cache_set gagal utk key %s — dilewati", key)
 
 
-async def cache_delete_pattern(pattern: str) -> None:
-    """Hapus keys matching pattern — invalidasi cache saat ingest baru."""
+async def cache_delete_pattern(pattern: str) -> int:
+    """Hapus keys matching pattern — invalidasi cache saat ingest baru.
+
+    Return jumlah key terhapus (0 bila Redis tidak tersedia / gagal).
+    """
     client = redis_module.redis_client
     if client is None:
-        return
+        return 0
     try:
         keys = [key async for key in client.scan_iter(match=pattern)]
         if keys:
             await client.delete(*keys)
+        return len(keys)
     except Exception:
-        logger.warning("cache_delete_pattern gagal utk %s — dilewati", pattern)
+        logger.warning("cache_delete_pattern gagal untuk %s — dilewati", pattern)
+        return 0

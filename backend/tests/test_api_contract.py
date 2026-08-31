@@ -82,3 +82,40 @@ async def test_stream_response_headers():
     assert resp.media_type == "text/event-stream"
     assert resp.headers["cache-control"] == "no-cache"
     assert resp.headers["x-accel-buffering"] == "no"
+
+# ── Export & system utility ──
+
+
+def test_clear_cache_success(client):
+    res = client.post("/api/v1/system/clear-cache")
+    assert res.status_code == 200
+    body = res.json()
+    assert body["success"] is True
+    assert isinstance(body["data"]["cleared_keys"], int)
+
+
+def test_export_earthquakes_csv(client):
+    res = client.get("/api/v1/export/earthquakes?format=csv&hours=24")
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("text/csv")
+    assert "attachment" in res.headers["content-disposition"]
+    header_line = res.text.splitlines()[0]
+    assert "magnitude" in header_line
+    assert "event_time_wib" in header_line
+
+
+def test_export_weather_json(client):
+    res = client.get("/api/v1/export/weather?format=json")
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("application/json")
+    body = res.json()
+    assert body["dataset"] == "weather"
+    assert "items" in body
+
+
+def test_export_invalid_dataset_422(client):
+    assert client.get("/api/v1/export/bogus").status_code == 422
+
+
+def test_export_invalid_format_422(client):
+    assert client.get("/api/v1/export/earthquakes?format=xml").status_code == 422

@@ -73,16 +73,18 @@ def create_app() -> FastAPI:
             CORSMiddleware,
             allow_origin_regex=r"https?://(localhost|127\.0\.0\.1):\d+",
             allow_credentials=True,
-            allow_methods=["GET", "POST", "OPTIONS"],  # Ditambahkan OPTIONS
+            allow_methods=["GET", "POST"],
             allow_headers=["*"],
+            expose_headers=["Content-Disposition"],
         )
     else:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.cors_origin_list,
             allow_credentials=True,
-            allow_methods=["GET", "POST", "OPTIONS"],  # Ditambahkan OPTIONS
+            allow_methods=["GET", "POST"],
             allow_headers=["*"],
+            expose_headers=["Content-Disposition"],
         )
 
     # ── 2. Error Handler (Lapisan DALAM) ──
