@@ -1,0 +1,1 @@
+{"success":false,"timestamp":"2026-08-31T16:30:38.776144+00:00","error":{"code":"SERVICE_UNAVAILABLE","message":"Service temporarily unavailable — infrastruktur database/cache tidak responsif. Cek: docker compose ps"}}

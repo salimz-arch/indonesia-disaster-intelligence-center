@@ -28,6 +28,5 @@ api_router.include_router(stream_router)
 api_router.include_router(ai_router)
 api_router.include_router(alerts_router)
 api_router.include_router(analytics_router)
-
 api_router.include_router(system_router)
 api_router.include_router(export_router)
