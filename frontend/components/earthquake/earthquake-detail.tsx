@@ -2,60 +2,11 @@
 
 import { Check, Copy, MousePointerClick, X } from "lucide-react";
 import { useState } from "react";
-
+import { deriveRegion } from "@/lib/region"; // ✅ Pakai dari lib/region
 import { SourceTag } from "@/components/common/source-tag";
 import { CATEGORY_COLOR, CATEGORY_LABEL } from "@/lib/severity";
 import { formatDateTime, timeAgo } from "@/lib/format";
 import type { Earthquake } from "@/types/api";
-
-/** Region tampilan: pakai kolom region bila ada; kalau null derive dari
- *  location_text dengan beberapa heuristic yang lebih robust. */
-function deriveRegion(region: string | null, loc: string | null): string {
-  if (region) return region;
-  if (!loc) return "—";
-
-  const byComma = loc
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (byComma.length > 1) {
-    return byComma[byComma.length - 1];
-  }
-
-  const byDash = loc
-    .split("-")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (byDash.length > 1) {
-    return byDash[byDash.length - 1];
-  }
-
-  const words = loc.split(/\s+/).filter(Boolean);
-  const stopWords = new Set([
-    "di",
-    "laut",
-    "darat",
-    "timur",
-    "barat",
-    "utara",
-    "selatan",
-    "berada",
-    "pusat",
-    "gempa",
-    "sekitar",
-    "tenggara",
-    "baratlaut",
-    "timurlaut",
-    "baratdaya",
-  ]);
-
-  const meaningfulWords = words.filter((w) => !stopWords.has(w.toLowerCase()));
-  if (meaningfulWords.length >= 2) {
-    return meaningfulWords.slice(-2).join(" ");
-  }
-
-  return words[words.length - 1] || "—";
-}
 
 export function EarthquakeDetail({
   event,

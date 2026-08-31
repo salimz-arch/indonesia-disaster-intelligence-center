@@ -30,7 +30,15 @@ def parse_gempa(raw: dict) -> EarthquakeCreate | None:
             return None
 
         wilayah = raw.get("Wilayah") or ""
-        region = wilayah.split("-")[-1].strip() if "-" in wilayah else (wilayah or None)
+        
+        # ✅ UPDATE: Ambil kode/nama provinsi: segmen terakhir pola "X-Y-Z" jika
+        # merupakan kode wilayah (>= 3 huruf, bukan angka)
+        region = None
+        segments = [s.strip() for s in wilayah.split("-") if s.strip()]
+        if segments:
+            last = segments[-1]
+            if len(last) >= 3 and not last[0].isdigit():
+                region = last
 
         return EarthquakeCreate(
             provider="bmkg",
@@ -83,3 +91,4 @@ class BMKGEarthquakeProvider(EarthquakeProvider):
                 seen.add(parsed.source_id)
                 events.append(parsed)
         return events
+    
