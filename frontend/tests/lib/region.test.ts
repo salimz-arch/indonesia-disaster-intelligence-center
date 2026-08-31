@@ -1,41 +1,69 @@
 import { describe, expect, it } from "vitest";
+
 import { deriveRegion } from "@/lib/region";
 
-describe("deriveRegion — provider real-world patterns", () => {
-  it("BMKG: kode provinsi di segmen terakhir", () => {
-    expect(deriveRegion(null, "38 km TimurLaut RUTENG-MANGGARAI-NTT")).toBe(
-      "NTT",
-    );
+describe("deriveRegion — BMKG tanpa dash (kasus gagal sebelumnya)", () => {
+  it("di darat + arah berjarak → kabupaten", () => {
     expect(
-      deriveRegion(null, "108 km BaratDaya TAHUNA-KEP.SANGIHE-SULUT"),
+      deriveRegion(
+        null,
+        "Pusat gempa berada di darat 35 km Timur Laut Luwu Utara",
+      ),
+    ).toBe("Luwu Utara");
+  });
+
+  it("di laut + arah menempel + dash → kode provinsi", () => {
+    expect(
+      deriveRegion(
+        null,
+        "Pusat gempa berada di laut 38 km TimurLaut RUTENG-MANGGARAI-NTT",
+      ),
+    ).toBe("NTT");
+    expect(
+      deriveRegion(
+        null,
+        "Pusat gempa berada di laut 108 km BaratDaya TAHUNA-KEP.SANGIHE-SULUT",
+      ),
     ).toBe("SULUT");
   });
 
-  it("BMKG: bentuk panjang provinsi di teks", () => {
-    expect(deriveRegion(null, "Pusat gempa di laut Selatan Jawa Barat")).toBe(
-      "Jawa Barat",
-    );
+  it("di laut tanpa dash → nama lokasi utuh", () => {
+    expect(
+      deriveRegion(
+        null,
+        "Pusat gempa berada di laut 241 km BaratLaut Saumlaki",
+      ),
+    ).toBe("Saumlaki");
   });
+});
 
-  it("USGS: Place sebelum , Indonesia", () => {
+describe("deriveRegion — USGS", () => {
+  it("Place sebelum , Indonesia", () => {
+    expect(deriveRegion(null, "27 km S of Labuan Bajo, Indonesia")).toBe(
+      "Labuan Bajo",
+    );
     expect(deriveRegion(null, "142 km NW of Ternate, Indonesia")).toBe(
       "Ternate",
     );
   });
 
-  it("USGS: negara non-Indonesia dipertahankan", () => {
+  it("negara non-Indonesia dipertahankan", () => {
     expect(deriveRegion(null, "25 km ESE of Lospalos, Timor Leste")).toBe(
       "Timor Leste",
     );
   });
+});
 
-  it("kolom region resmi menang atas heuristik", () => {
-    expect(deriveRegion("Sumatera Utara", "apapun teksnya")).toBe(
-      "Sumatera Utara",
-    );
+describe("deriveRegion — kolom resmi & fallback", () => {
+  it("kolom region resmi menang", () => {
+    expect(deriveRegion("Sumatera Utara", "apapun")).toBe("Sumatera Utara");
   });
 
-  it("teks laut pendek dipertahankan", () => {
+  it("provinsi di teks polos", () => {
+    expect(deriveRegion(null, "Selatan Jawa Barat")).toBe("Jawa Barat");
+  });
+
+  it("teks pendek dipertahankan", () => {
     expect(deriveRegion(null, "Laut Banda")).toBe("Laut Banda");
   });
 
