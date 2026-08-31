@@ -71,3 +71,21 @@ describe("deriveRegion — kolom resmi & fallback", () => {
     expect(deriveRegion(null, null)).toBe("—");
   });
 });
+describe("deriveRegion — kolom region terkontaminasi teks penuh", () => {
+  it("region berisi teks lokasi utuh → diabaikan, derive dari location_text", () => {
+    const loc = "Pusat gempa berada di darat 35 km Timur Laut Luwu Utara";
+    expect(deriveRegion(loc, loc)).toBe("Luwu Utara");
+  });
+
+  it("region mengandung angka (km) → diabaikan", () => {
+    expect(deriveRegion("38 km TimurLaut", "apapun")).not.toBe(
+      "38 km TimurLaut",
+    );
+  });
+
+  it("region bersih tetap dipercaya", () => {
+    expect(deriveRegion("Luwu Utara", "teks panjang apapun")).toBe(
+      "Luwu Utara",
+    );
+  });
+});

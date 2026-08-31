@@ -132,10 +132,19 @@ export function deriveRegion(
   region: string | null,
   locationText: string | null,
 ): string {
-  // 1. Kolom resmi terisi → langsung pakai
-  if (region && region.trim()) return region.trim();
-  if (!locationText) return "—";
+  // 1. Kolom resmi — HANYA jika terlihat seperti wilayah, bukan teks lokasi utuh.
+  //    (Provider lama sempat menyimpan teks penuh di kolom region.)
+  if (region && region.trim()) {
+    const r = region.trim();
+    const suspicious =
+      r === locationText || // identik dengan teks lokasi
+      r.length > 40 || // terlalu panjang utk nama wilayah
+      /\d/.test(r) || // wilayah tidak mengandung angka ("35 km"!)
+      /^(pusat|di)\b/i.test(r); // prefix kalimat BMKG
+    if (!suspicious) return r;
+  }
 
+  if (!locationText) return "—";
   // 2. Format BMKG (di darat/laut X km ...) — handle SEMUA varian
   const core = stripBmkg(locationText);
   if (core) {
