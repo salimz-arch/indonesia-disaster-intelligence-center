@@ -1,9 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Cloudflare Pages: NEXT_OUTPUT=export → static out/
-  // Docker lokal/Render: default standalone
-  output: process.env.NEXT_OUTPUT === "export" ? "export" : "standalone",
+  // Docker lokal (default)          → standalone
+  // Vercel   (NEXT_OUTPUT=none)     → default (Vercel native)
+  // Static   (NEXT_OUTPUT=export)   → export (jika suatu saat perlu)
+  output:
+    process.env.NEXT_OUTPUT === "export"
+      ? "export"
+      : process.env.NEXT_OUTPUT === "none"
+        ? undefined
+        : "standalone",
   devIndicators: false,
 
   images: {
@@ -28,3 +34,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
