@@ -180,6 +180,6 @@ Distributed under the MIT License. See LICENSE for more information.
 
 ## 👨‍💻 Author
 
-A-Salim
-GitHub: **[salim-arch]**
-Project Link: **[indonesia-disaster-intelligence-center]**
+**A-Salim**  
+🔗 GitHub: [@salim-arch](https://github.com/salim-arch)  
+📦 Project: [indonesia-disaster-intelligence-center](https://github.com/salim-arch/indonesia-disaster-intelligence-center)
