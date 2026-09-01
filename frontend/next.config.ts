@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Cloudflare Pages: NEXT_OUTPUT=export → static out/
+  // Docker lokal/Render: default standalone
+  output: process.env.NEXT_OUTPUT === "export" ? "export" : "standalone",
   devIndicators: false,
 
   images: {

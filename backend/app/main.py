@@ -30,13 +30,14 @@ async def lifespan(app: FastAPI):
     await init_redis()
     db_ok = await ping_database()
     redis_ok = await ping_redis()
-    if settings.environment == "production" and not (db_ok and redis_ok):
-        raise RuntimeError(f"startup failed — database={db_ok}, redis={redis_ok}")
-    logger.info(
-        "infrastructure ready",
-        extra={"ctx": {"database": db_ok, "redis": redis_ok}},
-    )
-
+    if settings.environment == "production":
+        if not db_ok:
+            raise RuntimeError("startup failed — database unavailable")
+        if not redis_ok:
+            logger.warning(
+                "redis unavailable di production — cache disabled, "
+                "aplikasi lanjut dari database (best-effort)"
+            )
     # ── Data collector ──
     if settings.scheduler_enabled:
         from app.collector.scheduler import start_scheduler
