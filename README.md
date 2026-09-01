@@ -1,4 +1,4 @@
-# ID Indonesia Disaster Intelligence Center (IDIC)
+# Indonesia Disaster Intelligence Center (IDIC)
 
 > **Real-Time Intelligence for Weather, Earthquake & Disaster Monitoring**
 
