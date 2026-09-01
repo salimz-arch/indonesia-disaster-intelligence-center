@@ -97,9 +97,9 @@ Prasyarat
 -**Python:** 3.12+ & pip
 -**Docker & Docker Compose:** (untuk deployment penuh)
 
-Opsi 1:Development Lokal (tanpa Docker untuk app)
+## Opsi 1:Development Lokal (tanpa Docker untuk app)
 
-# 1. Infrastrukturdocker compose up -d postgres redis#
+1. Infrastrukturdocker compose up -d postgres redis
 
 2. Backend (terminal 1)cd backendpython -m venv venv && venv\Scripts\activate # Windowspip install -r requirements.txtcopy .env.example .env # DATABASE_URL → 127.0.0.1alembic upgrade headpython scripts/seed.pyuvicorn app.main:app --reload --port 8000# 3. Frontend (terminal 2)cd frontendnpm installcopy .env.local.example .env.localnpm run dev # http://localhost:3000
 
