@@ -19,8 +19,6 @@ Platform monitoring bencana Indonesia _full-stack_ yang menyediakan intelijen _r
 
 Peta interaktif dengan marker gempa realtime, KPI cards, dan daftar aktivitas seismik.
 
-*(Tambahkan screenshot Anda di folder `assets/`)*
-
 ![Overview Dashboard](assets/overview.png)
 
 ### 📊 Analytics & Trends
