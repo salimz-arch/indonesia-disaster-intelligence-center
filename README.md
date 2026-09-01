@@ -95,9 +95,9 @@ graph TD
 
 ## 🚀 Quickstart
 Prasyarat
--Node.js 20+ & npm
--Python 3.12+ & pip
--Docker & Docker Compose (untuk deployment penuh)
+-**Node.js:** 20+ & npm
+-**Python:** 3.12+ & pip
+-**Docker & Docker Compose:** (untuk deployment penuh)
 
 Opsi 1:Development Lokal (tanpa Docker untuk app)
 
@@ -113,15 +113,13 @@ Backend otomatis: migrate → seed lokasi & data sources → jalankan collector.
 
 | Variable | Default | Keterangan |
 | :--- | :--- | :--- |
-| `DATABASE_URL` | `postgresql://127.0.0.1` | **Dalam Docker:** `postgresql://postgres:5432` |
+| `DATABASE_URL` | `postgresql://127.0.0.1` | **Dalam Docker:** `postgresql+asyncpg://idic:idic@postgres:5432/idic` |
 | `REDIS_URL` | `redis://127.0.0.1` | **Dalam Docker:** `redis://redis:6379/0` |
 | `CORS_ORIGINS` | `http://localhost:3000` | Koma-separated; regex localhost bebas di mode dev |
 | `DATA_MODE` | `live` | `mock` = data tiruan berlabel (untuk dev offline) |
 | `AI_PROVIDER` | `mock` | `gemini` / `openai` + API key env masing-masing |
-| `NEXT_PUBLIC_API_BASE_URL`| `http://localhost:8000` | URL publik backend (di-bake saat build-time frontend) |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` | URL publik backend (di-bake saat build-time frontend) |
 | `ENVIRONMENT` | `development` | `production` = fail-fast + CORS ketat |
-
----
 
 ## 📡 API Reference (Prefix: `/api/v1`)
 
@@ -133,6 +131,8 @@ Backend otomatis: migrate → seed lokasi & data sources → jalankan collector.
 | `GET /alerts`, `/history` | Alert aktif & riwayat notifikasi |
 | `GET /analytics/{eq, rain, weather}` | Agregasi harian WIB (cache 15 menit) |
 | `POST /ai/analyze` | Situation analysis (`?force=true` untuk bypass cache) |
+| `GET /system/clear-cache` | Hapus cache Redis & force refresh dashboard |
+| `GET /export/{dataset}` | Unduh data sebagai CSV (WIB) atau JSON |
 | `GET /sources`, `/health` | Transparency status & monitoring infrastruktur |
 | `GET /stream` | Server-Sent Events (heartbeat 25s) |
 
@@ -153,31 +153,28 @@ Semua endpoint mengembalikan format *envelope* yang seragam untuk memudahkan par
 
 # Backend — 81 tests (Docker infra menyala)cd backend && pytest -q# Frontend — 41 testscd frontend && npm test
 
-## 📦 Deployment Notes
-ENVIRONMENT=production — backend fail-fast bila DB/Redis down
-Ganti POSTGRES_PASSWORD; jangan commit .env
-NEXT_PUBLIC_API_BASE_URL = URL publik backend (mis. https://api.domain.com)
-CORS_ORIGINS = domain frontend produksi
-SSE: disable buffering bila di belakang nginx (X-Accel-Buffering: no sudah dikirim)
-Setelah image jalan, verifikasi: GET /api/v1/health → semua komponen ok
-Roadmap: rate limiting produksi, PostGIS query nearby, provider flood/landslide resmi saat tersedia, AI provider key rotasi otomatis.
 
 ## ⚠️ Disclaimer
-PENTING: Platform ini adalah alat bantu monitoring dan visualisasi data.
--BUKAN sistem peringatan resmi pemerintah.
--BUKAN pengganti informasi dari layanan darurat atau   otoritas pemerintah.
--Kategori magnitudo & risk score adalah klasifikasi internal aplikasi untuk tujuan monitoring.
-Selalu verifikasi informasi kritis melalui saluran resmi:
--BMKG
--BNPB
 
-🙏 Data & Attribution
--BMKG TEWS — gempa realtime resmi Indonesia
--USGS FDSN — feed seismik internasional
--Open-Meteo — cuaca & presipitasi
--RainViewer — mosaik radar hujan
--Basemap © OpenStreetMap contributors © CARTO
-````
+**PENTING:** Platform ini adalah alat bantu monitoring dan visualisasi data.
+
+- **BUKAN** sistem peringatan resmi pemerintah.
+- **BUKAN** pengganti informasi dari layanan darurat atau otoritas pemerintah.
+- Kategori magnitudo & risk score adalah klasifikasi internal aplikasi untuk tujuan monitoring.
+
+Selalu verifikasi informasi kritis melalui saluran resmi:
+- [BMKG](https://www.bmkg.go.id)
+- [BNPB](https://www.bnpb.go.id)
+
+---
+
+## 🙏 Data & Attribution
+
+- **BMKG TEWS** — gempa realtime resmi Indonesia
+- **USGS FDSN** — feed seismik internasional
+- **Open-Meteo** — cuaca & presipitasi
+- **RainViewer** — mosaik radar hujan
+- **Basemap** © OpenStreetMap contributors © CARTO
 
 ## 📄 License
 
