@@ -5,9 +5,12 @@
 Platform monitoring bencana Indonesia _full-stack_ yang menyediakan intelijen _real-time_ untuk gempa bumi (BMKG/USGS), cuaca & curah hujan (Open-Meteo), serta analisis situasi berbasis AI — disajikan dalam antarmuka _dark-mode_ bergaya _command center_.
 
 ![Status](https://img.shields.io/badge/status-production__ready-brightgreen)
-![Tests](https://img.shields.io/badge/tests-122%20passing-22C55E)
-![Stack](https://img.shields.io/badge/stack-Next.js%2015%20%7C%20FastAPI%20%7C%20PostgreSQL-22D3EE)
+![Tests](https://img.shields.io/badge/tests-139%20passing-22C55E)
+![Docker](https://img.shields.io/badge/docker-full__stack-2496ED?logo=docker&logoColor=white)
+![Realtime](https://img.shields.io/badge/realtime-SSE_Events-FF4500)
+![AI](https://img.shields.io/badge/AI-Situation_Analysis-8A2BE2)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 
 ---
 
@@ -66,7 +69,7 @@ Sistem peringatan otomatis dengan banner kritis dan notifikasi browser (opt-in).
 
 ## 🏗️ Arsitektur Sistem
 
-````mermaid
+```mermaid
 graph TD
     A[Data Sources: BMKG, USGS, Open-Meteo, RainViewer] -->|HTTPX Async| B(Provider Adapters)
     B --> C[Normalizer & Validator Pydantic]
