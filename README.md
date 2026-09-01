@@ -1,4 +1,4 @@
-# 🇮🇩 Indonesia Disaster Intelligence Center (IDIC)
+# ID Indonesia Disaster Intelligence Center (IDIC)
 
 > **Real-Time Intelligence for Weather, Earthquake & Disaster Monitoring**
 
@@ -11,39 +11,44 @@ Platform monitoring bencana Indonesia _full-stack_ yang menyediakan intelijen _r
 ![AI](https://img.shields.io/badge/AI-Situation_Analysis-8A2BE2)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-
 ---
 
 ## 📸 Dokumentasi
 
-### 🌋 Overview Dashboard
+###  Overview Dashboard
 
 Peta interaktif dengan marker gempa realtime, KPI cards, dan daftar aktivitas seismik.
+
+*(Tambahkan screenshot Anda di folder `assets/`)*
+
 ![Overview Dashboard](assets/overview.png)
 
-### Analytics & Trends
+### 📊 Analytics & Trends
 
 Visualisasi data historis menggunakan ECharts: tren gempa, distribusi kedalaman, dan kondisi cuaca.
+
 ![Analytics Dashboard](assets/analytics.png)
 
 ### 🚨 Alert & Notification System
 
 Sistem peringatan otomatis dengan banner kritis dan notifikasi browser (opt-in).
+
 ![Alert System](assets/alerts.png)
 
 ---
 
-## Fitur Utama
+## ✨ Fitur Utama
 
 - 🌋 **Earthquake Realtime:** Integrasi data BMKG & USGS dengan marker interaktif, _ripple animation_, clustering, dan detail popup.
 - 🌦️ **Weather Monitoring:** Data cuaca dari 16 kota utama Indonesia dengan animasi kondisi cuaca dinamis dan sorting.
 - 🌧️ **Rainfall & Radar:** Intensitas hujan 6 level, tren 24/48/72 jam, dan lapisan radar animasi dari RainViewer.
 - 🗺️ **Interactive Map:** MapLibre GL JS dengan basemap gelap dan sistem _ladder fallback_ otomatis.
-- 🚨 **Automated Alerts:** Deteksi otomatis gempa M≥5.0, potensi tsunami, dan hujan ekstrem → Notification Center & Browser Notification (opt-in).
+- 🚨 **Automated Alerts:** Deteksi otomatis gempa M≥5.0, potensi tsunami, dan hujan ekstrem → Notification Center & Browser Notification.
 - ⚡ **Realtime SSE:** Event bus → Server-Sent Events → update data tanpa reload, dilengkapi _auto-reconnect_ + _resync_.
-- 🤖 **AI Situation Analysis:** Risk score deterministik + narasi LLM (Mock/Gemini/OpenAI via environment variable) untuk analisis situasi terpadu.
+-  **AI Situation Analysis:** Risk score deterministik + narasi LLM (Mock/Gemini/OpenAI via environment variable) untuk analisis situasi terpadu.
 - 📊 **Historical Analytics:** Agregasi harian (WIB) untuk tren gempa, distribusi kedalaman, suhu, dan curah hujan.
-- 📡 **Data Source Transparency:** Status _real-time_ untuk setiap sumber data (latency, uptime, attribution).
+-  **Data Source Transparency:** Status _real-time_ untuk setiap sumber data (latency, uptime, attribution).
+- 📥 **Data Export:** Unduh data monitoring dalam format CSV (Excel-friendly, waktu WIB) atau JSON.
 
 ---
 
@@ -64,8 +69,10 @@ Sistem peringatan otomatis dengan banner kritis dan notifikasi browser (opt-in).
 - **Database:** PostgreSQL 16 (via SQLAlchemy + Asyncpg)
 - **Cache & Pub/Sub:** Redis
 - **Task Scheduling:** APScheduler
-- **AI Integration:** Mock
+- **AI Integration:** Mock / Gemini / OpenAI
 - **Testing:** Pytest, HTTPX
+
+---
 
 ## 🏗️ Arsitektur Sistem
 
@@ -82,8 +89,8 @@ graph TD
     G -->|Real-time Updates| H[Next.js 15 Frontend]
 
     subgraph Frontend
-    H --> J[TanStack Query + Zustand]
-    H --> K[MapLibre + ECharts]
+        H --> J[TanStack Query + Zustand]
+        H --> K[MapLibre + ECharts]
     end
 
 ## 🚀 Quickstart
