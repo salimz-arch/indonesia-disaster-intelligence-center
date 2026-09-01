@@ -90,6 +90,7 @@ graph TD
         H --> J[TanStack Query + Zustand]
         H --> K[MapLibre + ECharts]
     end
+```
 ## 🚀 Quickstart
 Prasyarat
 -**Node.js:** 20+ & npm
